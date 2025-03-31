@@ -37,6 +37,7 @@ public class SecurityConfig {
 	private final JwtUtil jwtUtil;
 	private static final List<String> ALLOWED_ORIGINS = Arrays.asList("http://localhost:3000","https://roomtrackerpwa.onrender.com",
 			"https://room-react-git-master-anands-projects-607fcd69.vercel.app","http://192.168.29.164:3000",
+			"room-tracker-pwa.vercel.app","https://roomtrackerpwa.onrender.com",
 			"https://room-react-h0aj1lmb1-anands-projects-607fcd69.vercel.app", "https://pwamobile-4fnu.vercel.app","https://pwamobile-4fnu-git-main-anands-projects-607fcd69.vercel.app",
 			"https://roomtracker.fun","https://react-fornend.vercel.app","https://react-fornend.vercel.app");
 
