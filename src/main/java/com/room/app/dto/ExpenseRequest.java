@@ -9,25 +9,25 @@ import jakarta.validation.constraints.NotNull;
 
 public class ExpenseRequest {
 	@NotNull
-    private Long memberId;
-    
-    @NotBlank
-    private String description;
-    
-    @NotNull
-    private LocalDate date;
-    
-    @NotNull
-    @DecimalMin(value = "0.01")
-    private BigDecimal amount;
-    private Integer messageId;
-    
+	private Long memberId;
+
+	@NotBlank
+	private String description;
+
+	@NotNull
+	private LocalDate date;
+
+	@NotNull
+	@DecimalMin(value = "0.01")
+	private BigDecimal amount;
+	private Integer messageId;
+
 	public ExpenseRequest(Long long1, String description2, LocalDate date2, BigDecimal amount2) {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public ExpenseRequest() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public Long getMemberId() {
@@ -70,5 +70,4 @@ public class ExpenseRequest {
 		this.messageId = messageId;
 	}
 
-	
 }

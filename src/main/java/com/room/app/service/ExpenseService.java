@@ -123,18 +123,27 @@ public class ExpenseService {
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
 		// Add check for cleared expense
-		if (existingExpense.isCleared()) { // Assuming you have a boolean isCleared() method
+		if (existingExpense.isCleared()) {
 			throw new AccessDeniedException("Cannot modify cleared expenses");
 		}
 
-		// Rest of your existing code
+		// Get the member
 		Member member = memberRepository.findById(request.getMemberId())
 				.orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
+		// Calculate new remaining amount
+		BigDecimal newAmount = request.getAmount();
+		BigDecimal clearedAmount = existingExpense.getClearedAmount() != null ? existingExpense.getClearedAmount()
+				: BigDecimal.ZERO;
+		BigDecimal newRemainingAmount = newAmount.subtract(clearedAmount).max(BigDecimal.ZERO);
+
+		// Update all fields including remaining amount
 		existingExpense.setMember(member);
 		existingExpense.setDescription(request.getDescription());
-		existingExpense.setAmount(request.getAmount());
+		existingExpense.setAmount(newAmount);
 		existingExpense.setDate(request.getDate());
+		existingExpense.setRemainingAmount(newRemainingAmount);
+		existingExpense.setCleared(newRemainingAmount.compareTo(BigDecimal.ZERO) <= 0);
 
 		return expenseRepository.save(existingExpense);
 	}
@@ -152,17 +161,17 @@ public class ExpenseService {
 
 	@Transactional
 	public Expense clearExpense(Long expenseId, Long memberId, BigDecimal amount) throws ResourceNotFoundException {
-	    // Fetch expense and member
-	    Expense expense = expenseRepository.findById(expenseId)
-	        .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
-	    
-	    Member member = memberRepository.findById(memberId)
-	        .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+		// Fetch expense and member
+		Expense expense = expenseRepository.findById(expenseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
-	    // Validate payment amount
-	    if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-	        throw new IllegalArgumentException("Payment amount must be positive");
-	    }
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+		// Validate payment amount
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new IllegalArgumentException("Payment amount must be positive");
+		}
 
 		BigDecimal remainingBeforePayment = expense.getRemainingAmount();
 		if (amount.compareTo(remainingBeforePayment) > 0) {
@@ -201,15 +210,14 @@ public class ExpenseService {
 	public List<Expense> getExpensesByMemberName(String memberName) {
 		return expenseRepository.findByMemberNameContainingIgnoreCase(memberName);
 	}
+
 	public List<PaymentHistory> getPaymentHistoryByExpense(Long expenseId) {
-	    return paymentHistoryRepository.findByExpenseId(expenseId);
+		return paymentHistoryRepository.findByExpenseId(expenseId);
 	}
 
 	public Expense getExpenseById(Long id) throws ResourceNotFoundException {
-	    return expenseRepository.findById(id)
-	        .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
+		return expenseRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 	}
 
-	
-	
 }
