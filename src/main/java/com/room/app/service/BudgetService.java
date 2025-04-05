@@ -53,7 +53,6 @@ public class BudgetService {
 	        budgetRepository.save(newBudget);
 	    }
 	}
-
 	@Transactional(readOnly = true)
 	public Budget getCurrentBudget() {
 		return budgetRepository.findTopByOrderByCreatedAtDesc()
