@@ -1,5 +1,6 @@
 package com.room.app.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -115,5 +116,19 @@ public class MemberService {
 
 		return memberRepository.existsById(userId);
 	}
+
+	 @Transactional
+	    public Member updateMemberBudget(Long memberId, BigDecimal monthlyBudget) throws ResourceNotFoundException {
+	        Member member = memberRepository.findById(memberId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+	        
+	       
+	        if (monthlyBudget.compareTo(BigDecimal.ZERO) < 0) {
+	            throw new IllegalArgumentException("Budget amount cannot be negative");
+	        }
+	        
+	        member.setMonthlyBudget(monthlyBudget);
+	        return memberRepository.save(member);
+	    }
 
 }

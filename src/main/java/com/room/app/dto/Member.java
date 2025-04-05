@@ -1,5 +1,6 @@
 package com.room.app.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,6 +23,9 @@ public class Member {
 
 	@Column(unique = true, nullable = false)
 	private String name;
+	
+	@Column(name = "monthly_budget", precision = 10, scale = 2)
+    private BigDecimal monthlyBudget;
 
 	@OneToMany(mappedBy = "member")
 	@JsonIgnore
@@ -87,5 +91,22 @@ public class Member {
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
 	}
+
+	public BigDecimal getMonthlyBudget() {
+		return monthlyBudget;
+	}
+
+	public void setMonthlyBudget(BigDecimal monthlyBudget) {
+		this.monthlyBudget = monthlyBudget;
+	}
+
+	public BigDecimal getCurrentSpending() {
+		// TODO Auto-generated method stubs
+		return null;
+	}
+
+	
+
+	
 
 }
