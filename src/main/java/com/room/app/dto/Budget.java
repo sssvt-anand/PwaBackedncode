@@ -16,7 +16,7 @@ import lombok.Builder;
 @Entity
 @Table(name = "budgets")
 @Builder
-public class Budget {
+public class Budget{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

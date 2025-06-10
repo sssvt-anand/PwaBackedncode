@@ -107,8 +107,10 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.32</version> <!-- or the latest available -->
+			<scope>provided</scope>
 		</dependency>
+
 
 		<!-- DevTools -->
 		<dependency>
