@@ -76,6 +76,20 @@ public class Budget {
 		this.createdAt = createdAt;
 	}
 
+	public Budget(Long id, String monthYear, BigDecimal totalBudget, BigDecimal remainingBudget,
+			LocalDateTime createdAt) {
+		super();
+		this.id = id;
+		this.monthYear = monthYear;
+		this.totalBudget = totalBudget;
+		this.remainingBudget = remainingBudget;
+		this.createdAt = createdAt;
+	}
+
+	public Budget() {
+		
+	}
+
 	
 
 	

@@ -88,7 +88,9 @@ public class SecurityConfig {
 
 		http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/auth/login", "/auth/register", "/auth/logout","/auth/forgot-password","/auth/reset-password","/api/budget/**").permitAll()
+						.requestMatchers("/auth/login", "/auth/register", "/auth/logout","/auth/forgot-password",
+								"/auth/reset-password","/api/budget/**","/actuator/health","/actuator/**").permitAll()
+						.requestMatchers("/manage/health", "/manage/metrics", "/manage/prometheus").permitAll()
 						.requestMatchers("/api/expenses/**", "/api/exports/**", "/api/members/**","/auth/users/**").permitAll()
 						.requestMatchers(HttpMethod.PUT, "/auth/update/**").hasRole("ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/api/expenses/**").hasRole("ADMIN")

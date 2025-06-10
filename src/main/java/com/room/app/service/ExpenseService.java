@@ -50,10 +50,8 @@ public class ExpenseService {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         
-        // Refund to budget if expense wasn't cleared
-        if (!expense.isCleared()) {
-            budgetService.refundToBudget(expense.getAmount());
-        }
+               
+        budgetService.refundToBudget(expense.getAmount());
         
         expense.setIsDeleted("Y");
         expense.setDeletedBy(deletedBy);

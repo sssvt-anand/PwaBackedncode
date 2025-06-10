@@ -22,4 +22,10 @@ public class BudgetStatusResponse {
 		this.isOverBudget = budget.getRemainingBudget().compareTo(BigDecimal.ZERO) < 0;
 		this.overBudgetAmount = this.isOverBudget ? budget.getRemainingBudget().abs() : BigDecimal.ZERO;
 	}
+
+	public BudgetStatusResponse(BigDecimal monthlyBudget, BigDecimal memberRemaining, String monthYear2, boolean b,
+			Object object) {
+		// TODO Auto-generated constructor stub
+	}
+
 }
