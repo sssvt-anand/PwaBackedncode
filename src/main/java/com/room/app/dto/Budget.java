@@ -18,23 +18,22 @@ import lombok.Builder;
 @Builder
 public class Budget {
 
-	
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @Column(name = "month_year", nullable = false, unique = true)
-    private String monthYear; // Format: "YYYY-MM"
-    
-    @Column(name = "total_budget", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalBudget;
-    
-    @Column(name = "remaining_budget", nullable = false, precision = 10, scale = 2)
-    private BigDecimal remainingBudget;
-    
-    @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(name = "month_year", nullable = false, unique = true)
+	private String monthYear; // Format: "YYYY-MM"
+
+	@Column(name = "total_budget", nullable = false, precision = 10, scale = 2)
+	private BigDecimal totalBudget;
+
+	@Column(name = "remaining_budget", nullable = false, precision = 10, scale = 2)
+	private BigDecimal remainingBudget;
+
+	@CreationTimestamp
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
 	public Long getId() {
 		return id;
@@ -87,17 +86,7 @@ public class Budget {
 	}
 
 	public Budget() {
-		
+
 	}
 
-	
-
-	
-
-	
-
-	
-    
-    
 }
-

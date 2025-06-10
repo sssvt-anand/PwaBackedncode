@@ -31,8 +31,8 @@ public class BudgetController {
         Budget budget = budgetService.getCurrentBudget();
         return ResponseEntity.ok(Map.of(
             "totalBudget", budget.getTotalBudget(),
-            "remainingBudget", budget.getRemainingBudget(),
-            "utilizedBudget", budget.getTotalBudget().subtract(budget.getRemainingBudget()),
+            "utilizedBudget", budget.getRemainingBudget(),
+            "remainingBudget", budget.getTotalBudget().add(budget.getRemainingBudget()),
             "monthYear", budget.getMonthYear()
         ));
     }
