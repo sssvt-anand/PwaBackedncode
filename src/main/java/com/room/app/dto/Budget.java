@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
 
+
 @Entity
 @Table(name = "budgets")
 @Builder
