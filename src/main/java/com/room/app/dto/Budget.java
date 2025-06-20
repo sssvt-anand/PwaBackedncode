@@ -110,5 +110,14 @@ public class Budget {
 	public void setArchivedAt(LocalDateTime archivedAt) {
 		this.archivedAt = archivedAt;
 	}
-
+	public Budget(Long id, String monthYear, BigDecimal totalBudget, BigDecimal remainingBudget,
+				  LocalDateTime createdAt, Boolean archived, LocalDateTime archivedAt) {
+		this.id = id;
+		this.monthYear = monthYear;
+		this.totalBudget = totalBudget;
+		this.remainingBudget = remainingBudget;
+		this.createdAt = createdAt;
+		this.archived = archived;
+		this.archivedAt = archivedAt;
+	}
 }
