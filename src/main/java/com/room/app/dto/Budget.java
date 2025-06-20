@@ -13,11 +13,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
 
-
 @Entity
 @Table(name = "budgets")
 @Builder
-public class Budget{
+public class Budget {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +34,12 @@ public class Budget{
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
+
+	@Column(nullable = true)
+	private Boolean archived = false;
+
+	@Column(name = "archived_at")
+	private LocalDateTime archivedAt;
 
 	public Long getId() {
 		return id;
@@ -88,6 +93,22 @@ public class Budget{
 
 	public Budget() {
 
+	}
+
+	public Boolean getArchived() {
+		return archived;
+	}
+
+	public void setArchived(Boolean archived) {
+		this.archived = archived;
+	}
+
+	public LocalDateTime getArchivedAt() {
+		return archivedAt;
+	}
+
+	public void setArchivedAt(LocalDateTime archivedAt) {
+		this.archivedAt = archivedAt;
 	}
 
 }

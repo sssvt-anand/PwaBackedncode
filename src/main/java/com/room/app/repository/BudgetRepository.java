@@ -1,5 +1,6 @@
 package com.room.app.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,10 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
 	@Query("SELECT b FROM Budget b WHERE b.monthYear = :monthYear")
 	Optional<Budget> findByMonthYear(String monthYear);
+
+	@Query("SELECT b FROM Budget b WHERE b.archived = false ORDER BY b.createdAt DESC")
+	Optional<Budget> findCurrentActiveBudget();
+
+	@Query("SELECT b FROM Budget b WHERE b.archived = true ORDER BY b.archivedAt DESC")
+	List<Budget> findAllArchivedBudgets();
 }

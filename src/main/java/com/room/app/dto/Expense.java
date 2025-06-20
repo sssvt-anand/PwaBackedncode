@@ -40,6 +40,31 @@ public class Expense {
 	@Column(name = "date")
 	private LocalDate date;
 
+	@Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+	@PrePersist
+    protected void initializeEntity() {
+		 this.createdAt = LocalDateTime.now();
+        
+        // Initialize amounts
+        if (this.remainingAmount == null) {
+            this.remainingAmount = this.amount;
+        }
+        if (this.clearedAmount == null) {
+            this.clearedAmount = BigDecimal.ZERO;
+        }
+        if (this.lastClearedAmount == null) {
+            this.lastClearedAmount = BigDecimal.ZERO;
+        }
+        if (this.isDeleted == null) {
+            this.isDeleted = "N";
+        }
+        if (this.cleared == null) {
+            this.cleared = false;
+        }
+    }
+
 	private BigDecimal amount;
 
 	@Column(name = "message_id")
@@ -68,16 +93,6 @@ public class Expense {
 	@JsonIgnore
 	private List<PaymentHistory> paymentHistories;
 
-	@PrePersist
-	protected void initializeAmounts() {
-		if (this.remainingAmount == null) {
-			this.remainingAmount = this.amount;
-		}
-		if (this.clearedAmount == null) {
-			this.clearedAmount = BigDecimal.ZERO;
-		}
-	}
-
 	@ManyToOne
 	@JoinColumn(name = "last_cleared_by_member_id")
 	private Member lastClearedBy;
@@ -87,6 +102,9 @@ public class Expense {
 
 	@Column(name = "last_cleared_amount", precision = 10, scale = 2)
 	private BigDecimal lastClearedAmount = BigDecimal.ZERO;
+
+	@Column(nullable = true) // Make it nullable initially
+	private Boolean active;
 
 	public Member getLastClearedBy() {
 		return lastClearedBy;
@@ -256,7 +274,20 @@ public class Expense {
 		this.paymentHistories = paymentHistories;
 	}
 
-	
-	
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
 
 }

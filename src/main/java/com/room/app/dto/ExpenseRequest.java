@@ -2,6 +2,7 @@ package com.room.app.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +22,8 @@ public class ExpenseRequest {
 	@DecimalMin(value = "0.01")
 	private BigDecimal amount;
 	private Integer messageId;
+	
+	 private LocalDateTime createdAt;
 
 	public ExpenseRequest(Long long1, String description2, LocalDate date2, BigDecimal amount2) {
 
@@ -68,6 +71,14 @@ public class ExpenseRequest {
 
 	public void setMessageId(Integer messageId) {
 		this.messageId = messageId;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 
 }

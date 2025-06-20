@@ -236,5 +236,37 @@ public class ExpenseService {
 		return expenseRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 	}
+	@Transactional
+	public void clearAllExpenses() {
+	    List<Expense> activeExpenses = expenseRepository.findByActiveTrue();
+	    
+	    for (Expense expense : activeExpenses) {
+	        // Skip already cleared expenses
+	        if (expense.isCleared()) {
+	            continue;
+	        }
 
+	        // Calculate remaining amount to clear
+	        BigDecimal remainingAmount = expense.getAmount()
+	                .subtract(expense.getClearedAmount() != null ? expense.getClearedAmount() : BigDecimal.ZERO);
+	        
+	        if (remainingAmount.compareTo(BigDecimal.ZERO) > 0) {
+	            // Create final clearing payment
+	            PaymentHistory finalPayment = new PaymentHistory();
+	            finalPayment.setAmount(remainingAmount);
+	            finalPayment.setTimestamp(LocalDateTime.now());
+	            finalPayment.setExpense(expense);
+	            paymentHistoryRepository.save(finalPayment);
+	            
+	            // Update expense totals
+	            expense.setClearedAmount(expense.getAmount());
+	            expense.setRemainingAmount(BigDecimal.ZERO);
+	        }
+	        
+	        // Mark expense as fully cleared
+	        expense.setCleared(true);
+	        expense.setClearedAt(LocalDateTime.now());
+	        expenseRepository.save(expense);
+	    }
+	}
 }

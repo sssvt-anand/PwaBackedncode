@@ -2,9 +2,9 @@ package com.room.app.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
-
 import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,9 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.room.app.dto.Budget;
 import com.room.app.dto.BudgetStatusResponse;
 import com.room.app.dto.Member;
-
 import com.room.app.dto.MemberBudgetDetail;
-
 import com.room.app.exception.ResourceNotFoundException;
 import com.room.app.repository.BudgetRepository;
 import com.room.app.repository.MemberRepository;
@@ -175,5 +173,30 @@ public class BudgetService {
 					overBudget, overBudgetAmount);
 		}).collect(Collectors.toList());
 	}
+	@Transactional
+	public void clearAllBudgetsAndExpenses() {
+	    // Archive current budget
+	    Budget currentBudget = getCurrentBudget();
+	    currentBudget.setArchived(true);
+	    currentBudget.setArchivedAt(LocalDateTime.now());
+	    
+	    // Create a new zero budget for the current month
+	    Budget newBudget = new Budget();
+	    newBudget.setMonthYear(YearMonth.now().toString());
+	    newBudget.setTotalBudget(BigDecimal.ZERO);
+	    newBudget.setRemainingBudget(BigDecimal.ZERO);
+	    
+	    budgetRepository.saveAll(List.of(currentBudget, newBudget));
+	}
 
+    @Transactional
+    public void archiveCurrentBudget() {
+        Budget currentBudget = getCurrentBudget();
+        currentBudget.setArchived(true);
+        currentBudget.setArchivedAt(LocalDateTime.now());
+        budgetRepository.save(currentBudget);
+        
+        // Create a new zero budget for the current month
+        initializeNewMonthBudget();
+    }
 }

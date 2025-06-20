@@ -9,9 +9,13 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+
 public class MemberBudgetDetail {
-    private Long memberId;
+    public MemberBudgetDetail(Long id, String name, BigDecimal monthlyBudget2, BigDecimal usedBudget2,
+			BigDecimal remainingBudget2, boolean overBudget2, BigDecimal overBudgetAmount2) {
+		// TODO Auto-generated constructor stub
+	}
+	private Long memberId;
     private String memberName;
     private BigDecimal monthlyBudget;
     private BigDecimal usedBudget;

@@ -46,6 +46,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
 	@Query("SELECT e FROM Expense e WHERE e.member.name ILIKE %:name% AND e.isDeleted = 'N'")
 	List<Expense> findByMemberNameContainingIgnoreCase(@Param("name") String name);
+	List<Expense> findByActiveTrue();
 
 	
 	
