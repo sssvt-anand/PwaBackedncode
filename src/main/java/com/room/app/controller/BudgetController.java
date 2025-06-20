@@ -36,7 +36,7 @@ public class BudgetController {
         return ResponseEntity.ok(Map.of(
             "totalBudget", budget.getTotalBudget(),
             "utilizedBudget", budget.getRemainingBudget(),
-            "remainingBudget", budget.getTotalBudget().subtract(budget.getRemainingBudget()),
+            "remainingBudget", budget.getTotalBudget().add(budget.getRemainingBudget()),
             "monthYear", budget.getMonthYear()
         ));
     }
