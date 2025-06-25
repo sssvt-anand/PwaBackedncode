@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,7 +20,7 @@ public class ExpenseRequest {
 	private String description;
 
 	@NotNull
-	private LocalDate date;
+	private LocalDate date; 
 
 	@NotNull
 	@DecimalMin(value = "0.01")

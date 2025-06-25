@@ -3,6 +3,7 @@ package com.room.app.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,7 +38,7 @@ public class Expense {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-	@Column(name = "date")
+	@Column(name = "date",columnDefinition = "TIMESTAMP")
 	private LocalDate date;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -102,6 +103,14 @@ public class Expense {
 
 	@Column(name = "last_cleared_amount", precision = 10, scale = 2)
 	private BigDecimal lastClearedAmount = BigDecimal.ZERO;
+	
+	public String getFormattedCreatedAt() {
+	    if (this.createdAt == null) {
+	        return null;
+	    }
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, hh:mm a");
+	    return this.createdAt.format(formatter);
+	}
 
 	@Column(nullable = true) // Make it nullable initially
 	private Boolean active;
@@ -289,5 +298,5 @@ public class Expense {
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
-
+	
 }
