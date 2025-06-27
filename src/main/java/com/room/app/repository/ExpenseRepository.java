@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.room.app.dto.Expense;
-import com.room.app.dto.PaymentHistory;
+import com.room.app.entity.Expense;
+import com.room.app.entity.PaymentHistory;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {

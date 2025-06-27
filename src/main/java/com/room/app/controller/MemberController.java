@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.room.app.dto.Member;
+import com.room.app.entity.Member;
 import com.room.app.service.MemberService;
 import com.room.app.service.ResourceNotFoundException;
 

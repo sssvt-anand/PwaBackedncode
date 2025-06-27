@@ -1,10 +1,12 @@
-package com.room.app.dto;
+package com.room.app.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,33 +40,34 @@ public class Expense {
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
-	@Column(name = "date",columnDefinition = "TIMESTAMP")
+	@Column(name = "date", columnDefinition = "TIMESTAMP")
 	private LocalDate date;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@CreationTimestamp
+	private LocalDateTime createdAt;
 
 	@PrePersist
-    protected void initializeEntity() {
-		 this.createdAt = LocalDateTime.now();
-        
-        // Initialize amounts
-        if (this.remainingAmount == null) {
-            this.remainingAmount = this.amount;
-        }
-        if (this.clearedAmount == null) {
-            this.clearedAmount = BigDecimal.ZERO;
-        }
-        if (this.lastClearedAmount == null) {
-            this.lastClearedAmount = BigDecimal.ZERO;
-        }
-        if (this.isDeleted == null) {
-            this.isDeleted = "N";
-        }
-        if (this.cleared == null) {
-            this.cleared = false;
-        }
-    }
+	protected void initializeEntity() {
+		this.createdAt = LocalDateTime.now();
+
+		// Initialize amounts
+		if (this.remainingAmount == null) {
+			this.remainingAmount = this.amount;
+		}
+		if (this.clearedAmount == null) {
+			this.clearedAmount = BigDecimal.ZERO;
+		}
+		if (this.lastClearedAmount == null) {
+			this.lastClearedAmount = BigDecimal.ZERO;
+		}
+		if (this.isDeleted == null) {
+			this.isDeleted = "N";
+		}
+		if (this.cleared == null) {
+			this.cleared = false;
+		}
+	}
 
 	private BigDecimal amount;
 
@@ -103,13 +106,13 @@ public class Expense {
 
 	@Column(name = "last_cleared_amount", precision = 10, scale = 2)
 	private BigDecimal lastClearedAmount = BigDecimal.ZERO;
-	
+
 	public String getFormattedCreatedAt() {
-	    if (this.createdAt == null) {
-	        return null;
-	    }
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, hh:mm a");
-	    return this.createdAt.format(formatter);
+		if (this.createdAt == null) {
+			return null;
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, hh:mm a");
+		return this.createdAt.format(formatter);
 	}
 
 	@Column(nullable = true) // Make it nullable initially
@@ -287,10 +290,6 @@ public class Expense {
 		return createdAt;
 	}
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
 	public Boolean getActive() {
 		return active;
 	}
@@ -298,5 +297,5 @@ public class Expense {
 	public void setActive(Boolean active) {
 		this.active = active;
 	}
-	
+
 }

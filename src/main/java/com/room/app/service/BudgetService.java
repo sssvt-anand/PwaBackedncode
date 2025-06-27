@@ -11,10 +11,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.room.app.dto.Budget;
 import com.room.app.dto.BudgetStatusResponse;
-import com.room.app.dto.Member;
 import com.room.app.dto.MemberBudgetDetail;
+import com.room.app.entity.Budget;
+import com.room.app.entity.Member;
 import com.room.app.exception.ResourceNotFoundException;
 import com.room.app.repository.BudgetRepository;
 import com.room.app.repository.MemberRepository;

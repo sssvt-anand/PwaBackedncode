@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
+import com.room.app.entity.Budget;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

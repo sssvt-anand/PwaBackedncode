@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.room.app.dto.Member;
+import com.room.app.entity.Member;
 import com.room.app.repository.MemberRepository;
 
 import jakarta.transaction.Transactional;

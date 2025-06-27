@@ -12,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import com.room.app.dto.Expense;
+import com.room.app.entity.Expense;
 import com.room.app.service.TelegramBotService;
 
 @Component

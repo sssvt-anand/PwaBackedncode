@@ -1,4 +1,4 @@
-package com.room.app.dto;
+package com.room.app.entity;
 
 import java.util.Collection;
 import java.util.List;

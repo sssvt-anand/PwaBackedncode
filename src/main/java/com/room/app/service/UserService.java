@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.room.app.dto.User;
 import com.room.app.dto.UserResponse;
+import com.room.app.entity.User;
 import com.room.app.exception.ResourceNotFoundException;
 import com.room.app.repository.UserRepository;
 

@@ -77,7 +77,7 @@ public class JwtUtil {
         List<String> roles = claims.get("roles", List.class);
 
         return roles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role)) // ✅ Ensure "ROLE_" prefix
+            .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
             .collect(Collectors.toList());
     }
 

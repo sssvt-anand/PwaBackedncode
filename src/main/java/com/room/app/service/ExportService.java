@@ -15,8 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.room.app.dto.Expense;
 import com.room.app.dto.ExportHistoryDTO;
+import com.room.app.entity.Expense;
 import com.room.app.repository.ExpenseRepository;
 
 @Service

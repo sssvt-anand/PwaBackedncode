@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.room.app.dto.Expense;
 import com.room.app.dto.ExpenseRequest;
-import com.room.app.dto.PaymentHistory;
-import com.room.app.dto.User;
+import com.room.app.entity.Expense;
+import com.room.app.entity.PaymentHistory;
+import com.room.app.entity.User;
 import com.room.app.exception.AccessDeniedException;
 import com.room.app.repository.UserRepository;
 import com.room.app.service.ExpenseService;
@@ -70,68 +70,67 @@ public class ExpenseController<ExpenseResponse> {
 		return ResponseEntity.ok(result);
 	}
 
-	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest request,
 			Principal principal) throws AccessDeniedException, ResourceNotFoundException {
+		
 		User user = getAuthenticatedUser(principal);
 		return ResponseEntity.ok(expenseService.updateExpense(id, request, user));
 	}
 
-	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteExpense(@PathVariable Long id, Principal principal)
-			throws AccessDeniedException, ResourceNotFoundException {
-
-		// Get authenticated admin user
-		User admin = userRepository.findByEmail(principal.getName())
-				.orElseThrow(() -> new AccessDeniedException("User not authenticated"));
-
-		// Perform soft delete with audit info
-		expenseService.softDeleteExpense(id, admin);
-
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<?> deleteExpense(@PathVariable Long id, Principal principal) {
+	    try {
+	        User user = getAuthenticatedUser(principal);
+	        expenseService.deleteExpense(id, user);
+	        return ResponseEntity.noContent().build();
+	    } catch (ResourceNotFoundException e) {
+	        return ResponseEntity.notFound().build();
+	    } catch (AccessDeniedException e) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+	                .body(Map.of("error", "Forbidden", "message", e.getMessage()));
+	    } catch (IllegalStateException e) {
+	        return ResponseEntity.badRequest()
+	                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
+	    }
 	}
-
 	private User getAuthenticatedUser(Principal principal) {
 		return userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 	}
 
-	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PutMapping("/clear/{expenseId}")
-    public ResponseEntity<?> clearExpense(
-        @PathVariable Long expenseId,
-        @RequestParam("memberId") Long memberId,
-        @RequestParam("amount") BigDecimal amount
-    ) {
-        try {
-            Expense clearedExpense = expenseService.clearExpense(expenseId, memberId, amount);
-            return ResponseEntity.ok(clearedExpense);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Expense not found", "details", e.getMessage()));
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Invalid request", "details", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "Server error", "details", e.getMessage()));
-        }
-    }
+	@PutMapping("/clear/{expenseId}")
+	public ResponseEntity<?> clearExpense(@PathVariable Long expenseId, @RequestParam("memberId") Long memberId,
+			@RequestParam("amount") BigDecimal amount) {
+		try {
+			Expense clearedExpense = expenseService.clearExpense(expenseId, memberId, amount);
+			return ResponseEntity.ok(clearedExpense);
+		} catch (ResourceNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(Map.of("error", "Expense not found", "details", e.getMessage()));
+		} catch (IllegalArgumentException | IllegalStateException e) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Invalid request", "details", e.getMessage()));
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError()
+					.body(Map.of("error", "Server error", "details", e.getMessage()));
+		}
+	}
+
 	@GetMapping("/{expenseId}/payments")
 	public ResponseEntity<List<PaymentHistory>> getPaymentHistory(@PathVariable Long expenseId) {
-	    List<PaymentHistory> payments = expenseService.getPaymentHistoryByExpense(expenseId);
-	    return ResponseEntity.ok(payments);
+		List<PaymentHistory> payments = expenseService.getPaymentHistoryByExpense(expenseId);
+		return ResponseEntity.ok(payments);
 	}
+
 	@GetMapping("/{id}")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) throws com.room.app.service.ResourceNotFoundException {
-        try {
-            Expense expense = expenseService.getExpenseById(id);
-            return ResponseEntity.ok(expense);
-        } catch (ResourceNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-        }
-    }
-	
+	public ResponseEntity<Expense> getExpenseById(@PathVariable Long id)
+			throws com.room.app.service.ResourceNotFoundException {
+		try {
+			Expense expense = expenseService.getExpenseById(id);
+			return ResponseEntity.ok(expense);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+		}
+	}
+
 }

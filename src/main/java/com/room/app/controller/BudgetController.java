@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.room.app.dto.Budget;
+import com.room.app.entity.Budget;
 import com.room.app.service.BudgetService;
 import com.room.app.service.ExpenseService;
 

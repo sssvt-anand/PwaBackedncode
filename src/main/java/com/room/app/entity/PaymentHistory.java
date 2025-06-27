@@ -1,7 +1,8 @@
-package com.room.app.dto;
+package com.room.app.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

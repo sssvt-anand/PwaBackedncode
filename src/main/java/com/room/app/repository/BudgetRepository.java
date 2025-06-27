@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import com.room.app.dto.Budget;
+import com.room.app.entity.Budget;
 
 import jakarta.persistence.LockModeType;
 

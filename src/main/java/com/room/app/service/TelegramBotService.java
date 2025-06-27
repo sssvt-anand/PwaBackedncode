@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.room.app.dto.Expense;
 import com.room.app.dto.ExpenseRequest;
-import com.room.app.dto.Member;
+import com.room.app.entity.Expense;
+import com.room.app.entity.Member;
 import com.room.app.repository.ExpenseRepository;
 
 @Service

@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.room.app.dto.Expense;
 import com.room.app.dto.ExpenseRequest;
-import com.room.app.dto.Member;
-import com.room.app.dto.PaymentHistory;
-import com.room.app.dto.User;
+import com.room.app.entity.Expense;
+import com.room.app.entity.Member;
+import com.room.app.entity.PaymentHistory;
+import com.room.app.entity.User;
 import com.room.app.exception.AccessDeniedException;
 import com.room.app.repository.ExpenseRepository;
 import com.room.app.repository.MemberRepository;
@@ -28,10 +28,11 @@ public class ExpenseService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
 	private final PaymentHistoryRepository paymentHistoryRepository;
-	 private final BudgetService budgetService ;
+	private final BudgetService budgetService;
 
 	public ExpenseService(ExpenseRepository expenseRepository, MemberService memberService,
-			MemberRepository memberRepository, PaymentHistoryRepository paymentHistoryRepository,BudgetService budgetService) {
+			MemberRepository memberRepository, PaymentHistoryRepository paymentHistoryRepository,
+			BudgetService budgetService) {
 		this.expenseRepository = expenseRepository;
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
@@ -44,18 +45,17 @@ public class ExpenseService {
 	}
 
 	@Transactional
-    public void softDeleteExpense(Long id, User deletedBy) throws ResourceNotFoundException {
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
-        
-               
-        budgetService.refundToBudget(expense.getAmount());
-        
-        expense.setIsDeleted("Y");
-        expense.setDeletedBy(deletedBy);
-        expense.setDeletedAt(LocalDateTime.now());
-        expenseRepository.save(expense);
-    }
+	public void softDeleteExpense(Long id, User deletedBy) throws ResourceNotFoundException {
+		Expense expense = expenseRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+
+		budgetService.refundToBudget(expense.getAmount());
+
+		expense.setIsDeleted("Y");
+		expense.setDeletedBy(deletedBy);
+		expense.setDeletedAt(LocalDateTime.now());
+		expenseRepository.save(expense);
+	}
 
 	public List<Expense> getMonthlyExpenses() {
 		LocalDate start = LocalDate.now().withDayOfMonth(1);
@@ -106,74 +106,83 @@ public class ExpenseService {
 		expenseRepository.save(expense);
 	}
 
-	 @Transactional
-	    public Expense addExpense(ExpenseRequest expenseRequest) throws ResourceNotFoundException {
-	        Member member = memberService.getMemberById(expenseRequest.getMemberId());
+	@Transactional
+	public Expense addExpense(ExpenseRequest expenseRequest) throws ResourceNotFoundException {
+		Member member = memberService.getMemberById(expenseRequest.getMemberId());
 
-	       
-	        budgetService.deductFromBudget(expenseRequest.getAmount());
+		budgetService.deductFromBudget(expenseRequest.getAmount());
 
-	        Expense expense = new Expense();
-	        expense.setMember(member);
-	        expense.setDescription(expenseRequest.getDescription());
-	        expense.setDate(expenseRequest.getDate());
-	        expense.setAmount(expenseRequest.getAmount());
-	        expense.setRemainingAmount(expenseRequest.getAmount());
-	        
-	        return expenseRepository.save(expense);
-	    }
+		Expense expense = new Expense();
+		expense.setMember(member);
+		expense.setDescription(expenseRequest.getDescription());
+		expense.setDate(expenseRequest.getDate());
+		expense.setAmount(expenseRequest.getAmount());
+		expense.setRemainingAmount(expenseRequest.getAmount());
 
-	 @Transactional
-	    public Expense updateExpense(Long id, ExpenseRequest request, User user)
-	            throws ResourceNotFoundException, AccessDeniedException {
-	        if (!user.getRole().equalsIgnoreCase("ROLE_ADMIN") && !user.getRole().equalsIgnoreCase("ADMIN")) {
-	            throw new AccessDeniedException("Only admins can update expenses");
-	        }
+		return expenseRepository.save(expense);
+	}
 
-	        Expense existingExpense = expenseRepository.findById(id)
-	                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+	@Transactional
+	public Expense updateExpense(Long id, ExpenseRequest request, User user)
+			throws ResourceNotFoundException, AccessDeniedException {
+		if (!isAdmin(user)) {
+			throw new AccessDeniedException("Only admins can update expenses");
+		}
 
-	        if (existingExpense.isCleared()) {
-	            throw new AccessDeniedException("Cannot modify cleared expenses");
-	        }
+		Expense existingExpense = expenseRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
-	        Member member = memberRepository.findById(request.getMemberId())
-	                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+		if (existingExpense.isCleared()) {
+			throw new AccessDeniedException("Cannot modify cleared expenses");
+		}
 
-	        // Calculate amount difference and adjust budget
-	        BigDecimal amountDifference = request.getAmount().subtract(existingExpense.getAmount());
-	        if (amountDifference.compareTo(BigDecimal.ZERO) > 0) {
-	            budgetService.deductFromBudget(amountDifference);
-	        } else if (amountDifference.compareTo(BigDecimal.ZERO) < 0) {
-	            budgetService.refundToBudget(amountDifference.abs());
-	        }
+		Member member = memberRepository.findById(request.getMemberId())
+				.orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-	        // Update expense fields
-	        existingExpense.setMember(member);
-	        existingExpense.setDescription(request.getDescription());
-	        existingExpense.setAmount(request.getAmount());
-	        existingExpense.setDate(request.getDate());
-	        
-	        // Recalculate remaining amount if there were cleared payments
-	        if (existingExpense.getClearedAmount() != null) {
-	            BigDecimal newRemainingAmount = request.getAmount().subtract(existingExpense.getClearedAmount());
-	            existingExpense.setRemainingAmount(newRemainingAmount.max(BigDecimal.ZERO));
-	            existingExpense.setCleared(newRemainingAmount.compareTo(BigDecimal.ZERO) <= 0);
-	        }
+		// Calculate amount difference and adjust budget
+		BigDecimal amountDifference = request.getAmount().subtract(existingExpense.getAmount());
+		if (amountDifference.compareTo(BigDecimal.ZERO) > 0) {
+			budgetService.deductFromBudget(amountDifference);
+		} else if (amountDifference.compareTo(BigDecimal.ZERO) < 0) {
+			budgetService.refundToBudget(amountDifference.abs());
+		}
 
-	        return expenseRepository.save(existingExpense);
-	    }
+		existingExpense.setMember(member);
+		existingExpense.setDescription(request.getDescription());
+		existingExpense.setAmount(request.getAmount());
+		existingExpense.setDate(request.getDate());
 
+		if (existingExpense.getClearedAmount() != null) {
+			BigDecimal newRemainingAmount = request.getAmount().subtract(existingExpense.getClearedAmount());
+			existingExpense.setRemainingAmount(newRemainingAmount.max(BigDecimal.ZERO));
+			existingExpense.setCleared(newRemainingAmount.compareTo(BigDecimal.ZERO) <= 0);
+		}
 
-	public void deleteExpense(Long id, User user) throws ResourceNotFoundException, AccessDeniedException {
+		return expenseRepository.save(existingExpense);
+	}
+
+	public void deleteExpense(Long id, User user)
+			throws ResourceNotFoundException, AccessDeniedException, IllegalStateException {
+		if (!isAdmin(user)) {
+			throw new AccessDeniedException("Only admins can delete expenses");
+		}
+		Expense expense = expenseRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+
+		if (expense.isCleared()) {
+			throw new IllegalStateException("Cannot delete expense that has been cleared (fully cleared)");
+		}
+
 		if (!user.getRole().equalsIgnoreCase("ROLE_ADMIN") && !user.getRole().equalsIgnoreCase("ADMIN")) {
 			throw new AccessDeniedException("Only admins can delete expenses");
 		}
 
-		if (!expenseRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Expense not found");
-		}
+		// If all checks pass, delete the expense
 		expenseRepository.deleteById(id);
+	}
+
+	private boolean isAdmin(User user) {
+		return user.getRole().equalsIgnoreCase("ROLE_ADMIN") || user.getRole().equalsIgnoreCase("ADMIN");
 	}
 
 	@Transactional
@@ -236,37 +245,38 @@ public class ExpenseService {
 		return expenseRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 	}
+
 	@Transactional
 	public void clearAllExpenses() {
-	    List<Expense> activeExpenses = expenseRepository.findByActiveTrue();
-	    
-	    for (Expense expense : activeExpenses) {
-	        // Skip already cleared expenses
-	        if (expense.isCleared()) {
-	            continue;
-	        }
+		List<Expense> activeExpenses = expenseRepository.findByActiveTrue();
 
-	        // Calculate remaining amount to clear
-	        BigDecimal remainingAmount = expense.getAmount()
-	                .subtract(expense.getClearedAmount() != null ? expense.getClearedAmount() : BigDecimal.ZERO);
-	        
-	        if (remainingAmount.compareTo(BigDecimal.ZERO) > 0) {
-	            // Create final clearing payment
-	            PaymentHistory finalPayment = new PaymentHistory();
-	            finalPayment.setAmount(remainingAmount);
-	            finalPayment.setTimestamp(LocalDateTime.now());
-	            finalPayment.setExpense(expense);
-	            paymentHistoryRepository.save(finalPayment);
-	            
-	            // Update expense totals
-	            expense.setClearedAmount(expense.getAmount());
-	            expense.setRemainingAmount(BigDecimal.ZERO);
-	        }
-	        
-	        // Mark expense as fully cleared
-	        expense.setCleared(true);
-	        expense.setClearedAt(LocalDateTime.now());
-	        expenseRepository.save(expense);
-	    }
+		for (Expense expense : activeExpenses) {
+			// Skip already cleared expenses
+			if (expense.isCleared()) {
+				continue;
+			}
+
+			// Calculate remaining amount to clear
+			BigDecimal remainingAmount = expense.getAmount()
+					.subtract(expense.getClearedAmount() != null ? expense.getClearedAmount() : BigDecimal.ZERO);
+
+			if (remainingAmount.compareTo(BigDecimal.ZERO) > 0) {
+				// Create final clearing payment
+				PaymentHistory finalPayment = new PaymentHistory();
+				finalPayment.setAmount(remainingAmount);
+				finalPayment.setTimestamp(LocalDateTime.now());
+				finalPayment.setExpense(expense);
+				paymentHistoryRepository.save(finalPayment);
+
+				// Update expense totals
+				expense.setClearedAmount(expense.getAmount());
+				expense.setRemainingAmount(BigDecimal.ZERO);
+			}
+
+			// Mark expense as fully cleared
+			expense.setCleared(true);
+			expense.setClearedAt(LocalDateTime.now());
+			expenseRepository.save(expense);
+		}
 	}
 }

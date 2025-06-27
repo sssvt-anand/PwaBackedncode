@@ -27,7 +27,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.room.app.dto.User;
+import com.room.app.entity.User;
 import com.room.app.repository.UserRepository;
 
 @Configuration
@@ -35,12 +35,12 @@ import com.room.app.repository.UserRepository;
 public class SecurityConfig {
 
 	private final JwtUtil jwtUtil;
-	private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-			"http://localhost:3000","https://roomtrackerpwa.onrender.com","https://react-fornend.vercel.app","https://react-fornend-git-master-anands-projects-607fcd69.vercel.app",
-			"http://192.168.29.164:3000",
-			"https://roomtrackerpwa.onrender.com","https://room-tracker-pwa-ldzs.vercel.app","https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
-			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"
-			);
+	private static final List<String> ALLOWED_ORIGINS = Arrays.asList("http://localhost:3000",
+			"https://roomtrackerpwa.onrender.com", "https://react-fornend.vercel.app",
+			"https://react-fornend-git-master-anands-projects-607fcd69.vercel.app", "http://192.168.29.164:3000",
+			"https://roomtrackerpwa.onrender.com", "https://room-tracker-pwa-ldzs.vercel.app",
+			"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
+			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app");
 
 	public SecurityConfig(JwtUtil jwtUtil) {
 		this.jwtUtil = jwtUtil;
@@ -79,7 +79,7 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(12); // Stronger hashing
+		return new BCryptPasswordEncoder(12);
 	}
 
 	@Bean
@@ -88,15 +88,14 @@ public class SecurityConfig {
 
 		http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-						.requestMatchers("/auth/login", "/auth/register", "/auth/logout","/auth/forgot-password",
-								"/auth/reset-password","/api/budget/**").permitAll()
-						.requestMatchers("/manage/**").permitAll()
-						.requestMatchers("/manage/health", "/manage/metrics","/manage/info" ,"/manage/prometheus").permitAll()
-						.requestMatchers("/api/expenses/**", "/api/exports/**", "/api/members/**","/auth/users/**").permitAll()
-						.requestMatchers(HttpMethod.PUT, "/auth/update/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.DELETE, "/api/expenses/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/expenses/clear/**").hasRole("ADMIN")
-						.requestMatchers(HttpMethod.PUT, "/api/expenses/**").hasRole("ADMIN").anyRequest()
+						.requestMatchers("/auth/login", "/auth/register", "/auth/logout", "/auth/forgot-password",
+								"/auth/reset-password", "/api/budget/**")
+						.permitAll().requestMatchers("/manage/**").permitAll()
+						.requestMatchers("/manage/health", "/manage/metrics", "/manage/info", "/manage/prometheus")
+						.permitAll().requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+						.permitAll()
+						.requestMatchers("/api/expenses/**", "/api/exports/**", "/api/members/**", "/auth/users/**")
+
 						.authenticated())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.addFilterBefore(jwtAuthenticationFilter(userDetailsService),
@@ -120,11 +119,12 @@ public class SecurityConfig {
 				.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
 		configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
-		configuration.setAllowedOrigins(Arrays.asList(
-			"http://localhost:3000","https://roomtrackerpwa.onrender.com","http://192.168.29.164:3000","https://react-fornend-git-master-anands-projects-607fcd69.vercel.app",
-			"https://react-fornend.vercel.app",
-			"https://roomtracker.fun","https://room-tracker-pwa-ldzs.vercel.app","https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
-			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"));
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://roomtrackerpwa.onrender.com",
+				"http://192.168.29.164:3000", "https://react-fornend-git-master-anands-projects-607fcd69.vercel.app",
+				"https://react-fornend.vercel.app", "https://roomtracker.fun",
+				"https://room-tracker-pwa-ldzs.vercel.app",
+				"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
+				"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 

@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.room.app.dto.User;
+import com.room.app.entity.User;
 import com.room.app.repository.UserRepository;
 
 @Service
