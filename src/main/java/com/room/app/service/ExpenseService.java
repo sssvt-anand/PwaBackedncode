@@ -22,21 +22,40 @@ import com.room.app.repository.PaymentHistoryRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 @Service
 public class ExpenseService {
-	private final ExpenseRepository expenseRepository;
-	private final MemberService memberService;
-	private final MemberRepository memberRepository;
-	private final PaymentHistoryRepository paymentHistoryRepository;
-	private final BudgetService budgetService;
 
-	public ExpenseService(ExpenseRepository expenseRepository, MemberService memberService,
-			MemberRepository memberRepository, PaymentHistoryRepository paymentHistoryRepository,
-			BudgetService budgetService) {
+	private ExpenseRepository expenseRepository;
+	private MemberService memberService;
+	private MemberRepository memberRepository;
+	private PaymentHistoryRepository paymentHistoryRepository;
+	private BudgetService budgetService;
+
+	@Autowired
+	public void setExpenseRepository(ExpenseRepository expenseRepository) {
 		this.expenseRepository = expenseRepository;
+	}
+
+	@Autowired
+	public void setMemberService(MemberService memberService) {
 		this.memberService = memberService;
+	}
+
+	@Autowired
+	public void setMemberRepository(MemberRepository memberRepository) {
 		this.memberRepository = memberRepository;
+	}
+
+	@Autowired
+	public void setPaymentHistoryRepository(PaymentHistoryRepository paymentHistoryRepository) {
 		this.paymentHistoryRepository = paymentHistoryRepository;
+	}
+
+	@Autowired
+	public void setBudgetService(BudgetService budgetService) {
 		this.budgetService = budgetService;
 	}
 
@@ -177,7 +196,6 @@ public class ExpenseService {
 			throw new AccessDeniedException("Only admins can delete expenses");
 		}
 
-		// If all checks pass, delete the expense
 		expenseRepository.deleteById(id);
 	}
 

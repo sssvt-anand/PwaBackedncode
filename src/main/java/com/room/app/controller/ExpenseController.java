@@ -36,14 +36,10 @@ import com.room.app.service.ResourceNotFoundException;
 @RequestMapping("/api/expenses")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ExpenseController<ExpenseResponse> {
-	private final ExpenseService expenseService;
-	private final UserRepository userRepository;
-
 	@Autowired
-	public ExpenseController(ExpenseService expenseService, UserRepository userRepository) {
-		this.expenseService = expenseService;
-		this.userRepository = userRepository;
-	}
+	private ExpenseService expenseService;
+	@Autowired
+	private UserRepository userRepository;
 
 	@GetMapping
 	public List<Expense> getAllExpenses() {
@@ -73,27 +69,27 @@ public class ExpenseController<ExpenseResponse> {
 	@PutMapping("/{id}")
 	public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody ExpenseRequest request,
 			Principal principal) throws AccessDeniedException, ResourceNotFoundException {
-		
+
 		User user = getAuthenticatedUser(principal);
 		return ResponseEntity.ok(expenseService.updateExpense(id, request, user));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteExpense(@PathVariable Long id, Principal principal) {
-	    try {
-	        User user = getAuthenticatedUser(principal);
-	        expenseService.deleteExpense(id, user);
-	        return ResponseEntity.noContent().build();
-	    } catch (ResourceNotFoundException e) {
-	        return ResponseEntity.notFound().build();
-	    } catch (AccessDeniedException e) {
-	        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-	                .body(Map.of("error", "Forbidden", "message", e.getMessage()));
-	    } catch (IllegalStateException e) {
-	        return ResponseEntity.badRequest()
-	                .body(Map.of("error", "Bad Request", "message", e.getMessage()));
-	    }
+		try {
+			User user = getAuthenticatedUser(principal);
+			expenseService.deleteExpense(id, user);
+			return ResponseEntity.noContent().build();
+		} catch (ResourceNotFoundException e) {
+			return ResponseEntity.notFound().build();
+		} catch (AccessDeniedException e) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN)
+					.body(Map.of("error", "Forbidden", "message", e.getMessage()));
+		} catch (IllegalStateException e) {
+			return ResponseEntity.badRequest().body(Map.of("error", "Bad Request", "message", e.getMessage()));
+		}
 	}
+
 	private User getAuthenticatedUser(Principal principal) {
 		return userRepository.findByEmail(principal.getName())
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));

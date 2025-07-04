@@ -7,6 +7,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +20,15 @@ import com.room.app.exception.ResourceNotFoundException;
 import com.room.app.repository.BudgetRepository;
 import com.room.app.repository.MemberRepository;
 
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 @Service
 
 public class BudgetService {
-	private final BudgetRepository budgetRepository;
-	private final MemberRepository memberRepository;
-
-	public BudgetService(BudgetRepository budgetRepository, MemberRepository memberRepository) {
-		this.budgetRepository = budgetRepository;
-		this.memberRepository = memberRepository;
-	}
+	@Autowired
+	private BudgetRepository budgetRepository;
+	@Autowired
+	private MemberRepository memberRepository;
 
 	@Scheduled(cron = "0 0 0 1 * ?") // Runs on 1st of each month at midnight
 	@Transactional
@@ -58,12 +58,11 @@ public class BudgetService {
 
 	@Transactional
 	public void deductFromBudget(BigDecimal amount) {
-	    Budget currentBudget = getCurrentBudget();
-	    BigDecimal newRemaining = currentBudget.getRemainingBudget().subtract(amount);
-	    currentBudget.setRemainingBudget(newRemaining);
-	    budgetRepository.save(currentBudget);  // Will throw OptimisticLockException if conflicted
+		Budget currentBudget = getCurrentBudget();
+		BigDecimal newRemaining = currentBudget.getRemainingBudget().subtract(amount);
+		currentBudget.setRemainingBudget(newRemaining);
+		budgetRepository.save(currentBudget); // Will throw OptimisticLockException if conflicted
 	}
-	
 
 	@Transactional
 	public void refundToBudget(BigDecimal amount) {
@@ -173,30 +172,31 @@ public class BudgetService {
 					overBudget, overBudgetAmount);
 		}).collect(Collectors.toList());
 	}
+
 	@Transactional
 	public void clearAllBudgetsAndExpenses() {
-	    // Archive current budget
-	    Budget currentBudget = getCurrentBudget();
-	    currentBudget.setArchived(true);
-	    currentBudget.setArchivedAt(LocalDateTime.now());
-	    
-	    // Create a new zero budget for the current month
-	    Budget newBudget = new Budget();
-	    newBudget.setMonthYear(YearMonth.now().toString());
-	    newBudget.setTotalBudget(BigDecimal.ZERO);
-	    newBudget.setRemainingBudget(BigDecimal.ZERO);
-	    
-	    budgetRepository.saveAll(List.of(currentBudget, newBudget));
+		// Archive current budget
+		Budget currentBudget = getCurrentBudget();
+		currentBudget.setArchived(true);
+		currentBudget.setArchivedAt(LocalDateTime.now());
+
+		// Create a new zero budget for the current month
+		Budget newBudget = new Budget();
+		newBudget.setMonthYear(YearMonth.now().toString());
+		newBudget.setTotalBudget(BigDecimal.ZERO);
+		newBudget.setRemainingBudget(BigDecimal.ZERO);
+
+		budgetRepository.saveAll(List.of(currentBudget, newBudget));
 	}
 
-    @Transactional
-    public void archiveCurrentBudget() {
-        Budget currentBudget = getCurrentBudget();
-        currentBudget.setArchived(true);
-        currentBudget.setArchivedAt(LocalDateTime.now());
-        budgetRepository.save(currentBudget);
-        
-        // Create a new zero budget for the current month
-        initializeNewMonthBudget();
-    }
+	@Transactional
+	public void archiveCurrentBudget() {
+		Budget currentBudget = getCurrentBudget();
+		currentBudget.setArchived(true);
+		currentBudget.setArchivedAt(LocalDateTime.now());
+		budgetRepository.save(currentBudget);
+
+		initializeNewMonthBudget();
+	}
+
 }

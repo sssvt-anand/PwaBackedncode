@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +16,11 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class MemberService {
-	private final MemberRepository memberRepository;
+	@Autowired
+	private  MemberRepository memberRepository;
 	private static final Pattern MOBILE_PATTERN = Pattern.compile("^\\+\\d{10,14}$");
 
-	public MemberService(MemberRepository memberRepository) {
-		this.memberRepository = memberRepository;
-	}
+	
 
 	public Optional<Member> getMemberByMobileNumber(String mobileNumber) {
 		return memberRepository.findByMobileNumber(mobileNumber);

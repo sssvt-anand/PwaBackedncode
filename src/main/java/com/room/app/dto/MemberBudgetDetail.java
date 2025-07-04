@@ -21,4 +21,60 @@ public class MemberBudgetDetail {
 		this.overBudget = overBudget;
 		this.overBudgetAmount = overBudgetAmount;
 	}
+
+	public Long getMemberId() {
+		return memberId;
+	}
+
+	public void setMemberId(Long memberId) {
+		this.memberId = memberId;
+	}
+
+	public String getMemberName() {
+		return memberName;
+	}
+
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
+	}
+
+	public BigDecimal getMonthlyBudget() {
+		return monthlyBudget;
+	}
+
+	public void setMonthlyBudget(BigDecimal monthlyBudget) {
+		this.monthlyBudget = monthlyBudget;
+	}
+
+	public BigDecimal getUsedBudget() {
+		return usedBudget;
+	}
+
+	public void setUsedBudget(BigDecimal usedBudget) {
+		this.usedBudget = usedBudget;
+	}
+
+	public BigDecimal getRemainingBudget() {
+		return remainingBudget;
+	}
+
+	public void setRemainingBudget(BigDecimal remainingBudget) {
+		this.remainingBudget = remainingBudget;
+	}
+
+	public boolean isOverBudget() {
+		return overBudget;
+	}
+
+	public void setOverBudget(boolean overBudget) {
+		this.overBudget = overBudget;
+	}
+
+	public BigDecimal getOverBudgetAmount() {
+		return overBudgetAmount;
+	}
+
+	public void setOverBudgetAmount(BigDecimal overBudgetAmount) {
+		this.overBudgetAmount = overBudgetAmount;
+	}
 }

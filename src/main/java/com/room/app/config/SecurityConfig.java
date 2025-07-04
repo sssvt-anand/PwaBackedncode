@@ -36,8 +36,7 @@ public class SecurityConfig {
 
 	private final JwtUtil jwtUtil;
 	private static final List<String> ALLOWED_ORIGINS = Arrays.asList("http://localhost:3000",
-			"https://roomtrackerpwa.onrender.com", "https://react-fornend.vercel.app",
-			"https://react-fornend-git-master-anands-projects-607fcd69.vercel.app", "http://192.168.29.164:3000",
+			"https://roomtrackerpwa.onrender.com", "https://roomtracker.netlify.app", "http://192.168.29.164:3000",
 			"https://roomtrackerpwa.onrender.com", "https://room-tracker-pwa-ldzs.vercel.app",
 			"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
 			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app");
@@ -56,9 +55,7 @@ public class SecurityConfig {
 
 			User user = userOptional.get();
 			return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-					user.isEnabled(), true, // accountNonExpired
-					true, // credentialsNonExpired
-					true, // accountNonLocked
+					user.isEnabled(), true, true, true,
 					Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole())));
 		};
 	}
@@ -119,12 +116,11 @@ public class SecurityConfig {
 				.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
 		configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://roomtrackerpwa.onrender.com",
-				"http://192.168.29.164:3000", "https://react-fornend-git-master-anands-projects-607fcd69.vercel.app",
-				"https://react-fornend.vercel.app", "https://roomtracker.fun",
-				"https://room-tracker-pwa-ldzs.vercel.app",
-				"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
-				"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"));
+		configuration.setAllowedOrigins(
+				Arrays.asList("http://localhost:3000", "http://192.168.29.164:3000", "https://roomtracker.netlify.app",
+						"https://roomtracker.fun", "https://room-tracker-pwa-ldzs.vercel.app",
+						"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
+						"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 

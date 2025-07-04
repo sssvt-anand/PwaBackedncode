@@ -23,43 +23,38 @@ import com.room.app.service.ResourceNotFoundException;
 @RequestMapping("/api/members")
 @CrossOrigin(origins = "http://localhost:3000")
 public class MemberController {
-    private final MemberService memberService;
+	@Autowired
+	private MemberService memberService;
 
-    @Autowired
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
-    }
+	@GetMapping
+	public ResponseEntity<List<Member>> getAllMembers() {
+		return ResponseEntity.ok(memberService.getAllMembers());
+	}
 
-    @GetMapping
-    public ResponseEntity<List<Member>> getAllMembers() {
-        return ResponseEntity.ok(memberService.getAllMembers());
-    }
+	@PatchMapping("/{id}/budget")
+	public ResponseEntity<Member> updateMemberBudget(@PathVariable Long id, @RequestParam BigDecimal monthlyBudget)
+			throws ResourceNotFoundException {
 
-    @PatchMapping("/{id}/budget")
-    public ResponseEntity<Member> updateMemberBudget(
-            @PathVariable Long id,
-            @RequestParam BigDecimal monthlyBudget) throws ResourceNotFoundException {
-        
-        // Additional validation
-        if (monthlyBudget == null) {
-            throw new IllegalArgumentException("Monthly budget parameter is required");
-        }
-        
-        Member updatedMember = memberService.updateMemberBudget(id, monthlyBudget);
-        return ResponseEntity.ok(updatedMember);
-    }
-    @PatchMapping("/{id}/budget-v2")
-    public ResponseEntity<Member> updateMemberBudgetWithBody(
-            @PathVariable Long id,
-            @RequestBody Map<String, BigDecimal> request) throws ResourceNotFoundException {
-        
-        BigDecimal monthlyBudget = request.get("monthlyBudget");
-        if (monthlyBudget == null) {
-            throw new IllegalArgumentException("Monthly budget parameter is required");
-        }
-        
-        Member updatedMember = memberService.updateMemberBudget(id, monthlyBudget);
-        return ResponseEntity.ok(updatedMember);
-    }
- 
+		// Additional validation
+		if (monthlyBudget == null) {
+			throw new IllegalArgumentException("Monthly budget parameter is required");
+		}
+
+		Member updatedMember = memberService.updateMemberBudget(id, monthlyBudget);
+		return ResponseEntity.ok(updatedMember);
+	}
+
+	@PatchMapping("/{id}/budget-v2")
+	public ResponseEntity<Member> updateMemberBudgetWithBody(@PathVariable Long id,
+			@RequestBody Map<String, BigDecimal> request) throws ResourceNotFoundException {
+
+		BigDecimal monthlyBudget = request.get("monthlyBudget");
+		if (monthlyBudget == null) {
+			throw new IllegalArgumentException("Monthly budget parameter is required");
+		}
+
+		Member updatedMember = memberService.updateMemberBudget(id, monthlyBudget);
+		return ResponseEntity.ok(updatedMember);
+	}
+
 }

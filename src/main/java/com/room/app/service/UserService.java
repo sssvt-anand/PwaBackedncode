@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,74 +15,62 @@ import com.room.app.repository.UserRepository;
 
 @Service
 public class UserService {
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+	public void register(User user) throws Exception {
+		if (user.getName() == null || user.getName().trim().isEmpty()) {
+			throw new IllegalArgumentException("Name cannot be empty");
+		}
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+		if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+			throw new IllegalArgumentException("Password cannot be empty");
+		}
 
-    public void register(User user) throws Exception {
-        if (user.getName() == null || user.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-        
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty");
-        }
-        
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be empty");
-        }
+		if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+			throw new IllegalArgumentException("Email cannot be empty");
+		}
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new Exception("Email already registered");
-        }
+		if (userRepository.existsByEmail(user.getEmail())) {
+			throw new Exception("Email already registered");
+		}
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-    }
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		userRepository.save(user);
+	}
 
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(user -> new UserResponse(
-                    user.getId(), 
-                    user.getName(), 
-                    user.getEmail(),
-                    user.getRole().replace("ROLE_", "")))
-                .collect(Collectors.toList());
-    }
+	public List<UserResponse> getAllUsers() {
+		return userRepository.findAll().stream().map(user -> new UserResponse(user.getId(), user.getName(),
+				user.getEmail(), user.getRole().replace("ROLE_", ""))).collect(Collectors.toList());
+	}
 
-    public UserResponse updateUserRole(Long userId, String newRole) throws ResourceNotFoundException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+	public UserResponse updateUserRole(Long userId, String newRole) throws ResourceNotFoundException {
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        String normalizedRole = newRole.startsWith("ROLE_") ? newRole : "ROLE_" + newRole;
-        user.setRole(normalizedRole);
+		String normalizedRole = newRole.startsWith("ROLE_") ? newRole : "ROLE_" + newRole;
+		user.setRole(normalizedRole);
 
-        User updatedUser = userRepository.save(user);
-        
-        return new UserResponse(
-            updatedUser.getId(), 
-            updatedUser.getName(), 
-            updatedUser.getEmail(),
-            normalizedRole.replace("ROLE_", ""));
-    }
+		User updatedUser = userRepository.save(user);
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-    }
+		return new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getEmail(),
+				normalizedRole.replace("ROLE_", ""));
+	}
 
-    public void updatePassword(String email, String newPassword) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-    }
+	public User findByEmail(String email) {
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+	}
+
+	public void updatePassword(String email, String newPassword) {
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
+	}
 
 	public boolean existsByEmail(String email) {
 		return userRepository.existsByEmail(email);

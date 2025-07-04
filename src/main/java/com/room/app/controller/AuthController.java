@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,27 +51,43 @@ import jakarta.ws.rs.core.HttpHeaders;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final UserService userService;
-    private final OTPService otpService;
-    private final AuthenticationManager authenticationManager;
+	private UserDetailsService userDetailsService;
+    private PasswordEncoder passwordEncoder;
+    private JwtUtil jwtUtil;
+    private UserService userService;
+    private OTPService otpService;
+    private AuthenticationManager authenticationManager;
 
-    public AuthController(
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder,
-            JwtUtil jwtUtil,
-            UserService userService,
-            OTPService otpService,
-            AuthenticationManager authenticationManager) {
+    @Autowired
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    public void setJwtUtil(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setOtpService(OTPService otpService) {
         this.otpService = otpService;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {

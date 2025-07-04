@@ -2,7 +2,6 @@ package com.room.app.controller;
 
 import java.time.LocalDate;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,7 +20,6 @@ public class ExportController {
 
     private final ExportService exportService;
 
-    @Autowired
     public ExportController(ExportService exportService) {
         this.exportService = exportService;
     }

@@ -1,8 +1,8 @@
 package com.room.app.controller;
 
-
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,28 +18,26 @@ import com.room.app.service.BudgetService;
 @RestController
 @RequestMapping("/api/member-budget")
 public class MemberBudgetController {
+	@Autowired
+	private BudgetService budgetService;
 
-    private final BudgetService budgetService;
+	@PostMapping
+	public ResponseEntity<?> setMemberBudget(@RequestBody MemberBudgetRequest request) {
+		try {
+			return ResponseEntity
+					.ok(budgetService.updateMemberBudget(request.getMemberId(), request.getMonthlyBudget()));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 
-    public MemberBudgetController(BudgetService budgetService) {
-        this.budgetService = budgetService;
-    }
+	@GetMapping("/status/{memberId}")
+	public ResponseEntity<BudgetStatusResponse> getMemberBudgetStatus(@PathVariable Long memberId) {
+		return ResponseEntity.ok(budgetService.getMemberBudgetStatus(memberId));
+	}
 
-    @PostMapping
-    public ResponseEntity<?> setMemberBudget(@RequestBody MemberBudgetRequest request) {
-        try {
-            return ResponseEntity.ok(budgetService.updateMemberBudget(request.getMemberId(), request.getMonthlyBudget()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/status/{memberId}")
-    public ResponseEntity<BudgetStatusResponse> getMemberBudgetStatus(@PathVariable Long memberId) {
-        return ResponseEntity.ok(budgetService.getMemberBudgetStatus(memberId));
-    }
-    @GetMapping("/all")
-    public ResponseEntity<Object> getAllMembersWithBudgets() {
-        return ResponseEntity.ok(budgetService.getAllMembersWithBudgets());
-    }
+	@GetMapping("/all")
+	public ResponseEntity<Object> getAllMembersWithBudgets() {
+		return ResponseEntity.ok(budgetService.getAllMembersWithBudgets());
+	}
 }

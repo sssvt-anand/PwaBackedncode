@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,15 +22,13 @@ import com.room.app.repository.ExpenseRepository;
 
 @Service
 public class ExportService {
-	private final ExpenseService expenseService;
-	private final ExpenseRepository expenseRepository;
-	private final ConcurrentLinkedQueue<ExportHistoryDTO> exportHistory = new ConcurrentLinkedQueue<>();
+	@Autowired
+	private ExpenseService expenseService;
+	@Autowired
+	private ExpenseRepository expenseRepository;
+	
+	private ConcurrentLinkedQueue<ExportHistoryDTO> exportHistory = new ConcurrentLinkedQueue<>();
 	private static final int MAX_HISTORY_ENTRIES = 50;
-
-	public ExportService(ExpenseService expenseService, ExpenseRepository expenseRepository) {
-		this.expenseService = expenseService;
-		this.expenseRepository = expenseRepository;
-	}
 
 	public ResponseEntity<ByteArrayResource> exportMonthlyExpenses(LocalDate start, LocalDate end) {
 		if (start == null)
@@ -62,7 +61,7 @@ public class ExportService {
 	}
 
 	public List<Expense> getExpensesByDateRange(LocalDate start, LocalDate end) {
-	    return expenseRepository.findByDateBetween(start, end);
+		return expenseRepository.findByDateBetween(start, end);
 	}
 
 	public ResponseEntity<ByteArrayResource> exportExpensesByMember(Long memberId) {
