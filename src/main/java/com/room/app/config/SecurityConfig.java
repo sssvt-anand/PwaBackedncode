@@ -39,7 +39,7 @@ public class SecurityConfig {
 			"https://roomtrackerpwa.onrender.com", "https://roomtracker.netlify.app", "http://192.168.29.164:3000",
 			"https://roomtrackerpwa.onrender.com", "https://room-tracker-pwa-ldzs.vercel.app",
 			"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
-			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app");
+			"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app","https://www.roomtracker.fun");
 
 	public SecurityConfig(JwtUtil jwtUtil) {
 		this.jwtUtil = jwtUtil;
@@ -120,7 +120,7 @@ public class SecurityConfig {
 				Arrays.asList("http://localhost:3000", "http://192.168.29.164:3000", "https://roomtracker.netlify.app",
 						"https://roomtracker.fun", "https://room-tracker-pwa-ldzs.vercel.app",
 						"https://room-tracker-pwa-ldzs-git-main-anands-projects-607fcd69.vercel.app",
-						"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app"));
+						"https://room-tracker-pwa-ldzs-pyddu4nvb-anands-projects-607fcd69.vercel.app","https://www.roomtracker.fun"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 
