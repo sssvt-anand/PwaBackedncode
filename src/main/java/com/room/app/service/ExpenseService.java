@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.room.app.dto.ExpenseRequest;
-import com.room.app.entity.Budget;
 import com.room.app.entity.Expense;
 import com.room.app.entity.Member;
 import com.room.app.entity.PaymentHistory;
@@ -23,9 +24,6 @@ import com.room.app.repository.MemberRepository;
 import com.room.app.repository.PaymentHistoryRepository;
 
 import jakarta.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ExpenseService {
@@ -77,7 +75,8 @@ public class ExpenseService {
 		LocalDate end = start.plusYears(1).minusDays(1);
 		return expenseRepository.findByDateBetween(start, end);
 	}
-
+	
+	@Cacheable(value = "expensesByMember", key = "#memberId")
 	public List<Expense> getExpensesByMember(Long memberId) {
 		return expenseRepository.findByMemberId(memberId);
 	}
@@ -93,13 +92,13 @@ public class ExpenseService {
 	public Expense saveExpense(Expense expense) {
 		return expenseRepository.save(expense);
 	}
-
+	@Cacheable(value = "clearedSummaryByMember")
 	public Map<String, BigDecimal> getClearedSummaryByMember() {
 		return expenseRepository.findAllActive().stream().filter(expense -> expense.getClearedAmount() != null)
 				.collect(Collectors.groupingBy(expense -> expense.getMember().getName(),
 						Collectors.reducing(BigDecimal.ZERO, Expense::getClearedAmount, BigDecimal::add)));
 	}
-
+	@Cacheable(value = "expenseSummaryByMember")
 	public Map<String, BigDecimal> getExpenseSummaryByMember() {
 		return expenseRepository.findAllActive().stream().filter(expense -> expense.getMember() != null)
 				.collect(Collectors.groupingBy(expense -> expense.getMember().getName(),
@@ -259,15 +258,17 @@ public class ExpenseService {
 
 		return expenseRepository.save(expense);
 	}
-
+	@Cacheable(value = "expensesByMemberName", key = "#memberName")
 	public List<Expense> getExpensesByMemberName(String memberName) {
 		return expenseRepository.findByMemberNameContainingIgnoreCase(memberName);
 	}
 
+	@Cacheable(value = "paymentHistory", key = "#expenseId")
 	public List<PaymentHistory> getPaymentHistoryByExpense(Long expenseId) {
 		return paymentHistoryRepository.findByExpenseId(expenseId);
 	}
 
+	@Cacheable(value = "expenses", key = "#id")
 	public Expense getExpenseById(Long id) throws ResourceNotFoundException {
 		return expenseRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));

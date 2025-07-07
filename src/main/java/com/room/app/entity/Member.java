@@ -10,11 +10,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "member")
+
+@Table(name = "member",
+			indexes = { @Index(name = "idx_member_name", columnList = "name"),
+		@Index(name = "idx_member_active", columnList = "active") })
 public class Member {
 
 	@Id
@@ -23,9 +27,9 @@ public class Member {
 
 	@Column(unique = true, nullable = false)
 	private String name;
-	
+
 	@Column(name = "monthly_budget", precision = 10, scale = 2)
-    private BigDecimal monthlyBudget;
+	private BigDecimal monthlyBudget;
 
 	@OneToMany(mappedBy = "member")
 	@JsonIgnore
@@ -104,9 +108,5 @@ public class Member {
 		// TODO Auto-generated method stubs
 		return null;
 	}
-
-	
-
-	
 
 }

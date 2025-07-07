@@ -35,6 +35,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	@Query("SELECT e.member, SUM(e.amount) as total FROM Expense e GROUP BY e.member ORDER BY total DESC")
 	List<Object[]> getTopSpenderWithAmount();
 
+	
 	List<Expense> findByMemberId(Long memberId);
 
 	List<Expense> findByMemberIsNull();

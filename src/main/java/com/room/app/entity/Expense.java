@@ -16,13 +16,34 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(indexes = {
+		
+		@Index(name = "idx_expense_is_deleted", columnList = "is_deleted"),
+		@Index(name = "idx_expense_active", columnList = "active"),
+		@Index(name = "idx_expense_cleared", columnList = "cleared"),
 
+		// Date-related indexes
+		@Index(name = "idx_expense_date", columnList = "date"), // Single column
+		@Index(name = "idx_expense_date_status", columnList = "date, is_deleted, active"), // Composite
+
+		// Member-related indexes
+		@Index(name = "idx_expense_member_id", columnList = "member_id"),
+		@Index(name = "idx_expense_member_status", columnList = "member_id, is_deleted, active"),
+
+		// Special fields
+		@Index(name = "idx_expense_message_id", columnList = "message_id", unique = true),
+
+		// Payment-related indexes
+		@Index(name = "idx_expense_cleared_amount", columnList = "cleared_amount"),
+		@Index(name = "idx_expense_amount_status", columnList = "amount, is_deleted") })
 public class Expense {
 
 	@Id
@@ -300,11 +321,6 @@ public class Expense {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
-	}
-
-	public void setDeletedBy(Member clearedBy2) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
