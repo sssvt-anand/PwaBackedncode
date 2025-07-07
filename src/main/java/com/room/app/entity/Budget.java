@@ -41,6 +41,12 @@ public class Budget {
 	@Column(name = "archived_at")
 	private LocalDateTime archivedAt;
 
+	@Column(name = "is_deleted", columnDefinition = "CHAR(1) DEFAULT 'N'")
+	private String deleted = "N";
+
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
+
 	public Long getId() {
 		return id;
 	}
@@ -110,8 +116,11 @@ public class Budget {
 	public void setArchivedAt(LocalDateTime archivedAt) {
 		this.archivedAt = archivedAt;
 	}
+
 	public Budget(Long id, String monthYear, BigDecimal totalBudget, BigDecimal remainingBudget,
-				  LocalDateTime createdAt, Boolean archived, LocalDateTime archivedAt) {
+			LocalDateTime createdAt, Boolean archived, LocalDateTime archivedAt, String deleted,
+			LocalDateTime deletedAt) {
+		super();
 		this.id = id;
 		this.monthYear = monthYear;
 		this.totalBudget = totalBudget;
@@ -119,5 +128,24 @@ public class Budget {
 		this.createdAt = createdAt;
 		this.archived = archived;
 		this.archivedAt = archivedAt;
+		this.deleted = deleted;
+		this.deletedAt = deletedAt;
 	}
+
+	public String getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(String deleted) {
+		this.deleted = deleted;
+	}
+
+	public LocalDateTime getDeletedAt() {
+		return deletedAt;
+	}
+
+	public void setDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
+
 }

@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,18 +21,14 @@ import com.room.app.entity.Member;
 import com.room.app.service.BudgetService;
 import com.room.app.service.ExpenseService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
 @RestController
 @RequestMapping("/api/budget")
 
 public class BudgetController {
 	@Autowired
-	private  BudgetService budgetService;
+	private BudgetService budgetService;
 	@Autowired
-	private  ExpenseService expenseService;
-
-	
+	private ExpenseService expenseService;
 
 	@GetMapping("/current")
 	public ResponseEntity<Budget> getCurrentBudget() {
@@ -63,8 +60,6 @@ public class BudgetController {
 	@PostMapping("/clear-all")
 	public ResponseEntity<String> clearAllData() {
 
-		expenseService.clearAllExpenses();
-
 		budgetService.clearAllBudgetsAndExpenses();
 
 		return ResponseEntity.ok("All expenses and budgets cleared successfully");
@@ -77,10 +72,9 @@ public class BudgetController {
 
 	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@PostMapping("/members/{memberId}")
-	public ResponseEntity<Member> updateMemberBudget(
-	        @PathVariable Long memberId, 
-	        @RequestBody UpdateBudgetRequest request) {
-	    return ResponseEntity.ok(budgetService.updateMemberBudget(memberId, request.getMonthlyBudget()));
+	public ResponseEntity<Member> updateMemberBudget(@PathVariable Long memberId,
+			@RequestBody UpdateBudgetRequest request) {
+		return ResponseEntity.ok(budgetService.updateMemberBudget(memberId, request.getMonthlyBudget()));
 	}
 
 	@GetMapping("/members/{memberId}/status")

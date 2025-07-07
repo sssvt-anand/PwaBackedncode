@@ -31,4 +31,9 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
 	@Query("SELECT b FROM Budget b WHERE b.archived = true ORDER BY b.archivedAt DESC")
 	List<Budget> findAllArchivedBudgets();
+
+	@Query("SELECT b FROM Budget b WHERE b.deleted = 'N'")
+	List<Budget> findAllActive();
+
+	boolean existsByMonthYearAndDeleted(String currentMonthYear, String string);
 }

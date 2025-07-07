@@ -24,24 +24,23 @@ public class User implements UserDetails { // Implement UserDetails
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	
-    @Column(nullable = false)
-    private String name;
+	@Column(nullable = false)
+	private String name;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
-    private String password;
+	@NotBlank(message = "Password is required")
+	@Column(nullable = false)
+	private String password;
 
-    @NotBlank(message = "Email is required")
-    @Email
-    @Column(nullable = false)
-    private String email;
+	@NotBlank(message = "Email is required")
+	@Email
+	@Column(nullable = false)
+	private String email;
 
-    @Column(name = "is_deleted", columnDefinition = "CHAR(1)")
-    private String isDeleted = "N";
+	@Column(name = "is_deleted", columnDefinition = "CHAR(1)")
+	private String isDeleted = "N";
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ROLE_USER'")
-    private String role = "ROLE_USER"; // Consistent role prefix
+	@Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ROLE_USER'")
+	private String role = "ROLE_USER"; // Consistent role prefix
 
 	// Getters and Setters
 	public String getRole() {
@@ -112,13 +111,13 @@ public class User implements UserDetails { // Implement UserDetails
 		this.password = password;
 	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public String getName() {
 		return name;
@@ -127,7 +126,5 @@ public class User implements UserDetails { // Implement UserDetails
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	
 
 }

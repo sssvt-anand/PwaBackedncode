@@ -298,4 +298,13 @@ public class Expense {
 		this.active = active;
 	}
 
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public void setDeletedBy(Member clearedBy2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

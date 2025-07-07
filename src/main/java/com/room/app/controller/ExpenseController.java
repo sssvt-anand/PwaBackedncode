@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ public class ExpenseController<ExpenseResponse> {
 	public ResponseEntity<?> deleteExpense(@PathVariable Long id, Principal principal) {
 		try {
 			User user = getAuthenticatedUser(principal);
-			expenseService.deleteExpense(id, user);
+			expenseService.softDeleteExpense(id, user);
 			return ResponseEntity.noContent().build();
 		} catch (ResourceNotFoundException e) {
 			return ResponseEntity.notFound().build();
@@ -127,6 +128,15 @@ public class ExpenseController<ExpenseResponse> {
 		} catch (ResourceNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
 		}
+	}
+
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+	@PostMapping("/clear-all")
+	public ResponseEntity<String> clearAllData(Principal principal, User user) {
+		// Get the authenticated user by email
+		expenseService.clearAllExpenses(user);
+
+		return ResponseEntity.ok("All expenses cleared successfully");
 	}
 
 }

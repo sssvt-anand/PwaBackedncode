@@ -2,22 +2,27 @@ package com.room.app.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.room.app.entity.Expense;
-import com.room.app.entity.PaymentHistory;
+import com.room.app.entity.User;
+
+import jakarta.transaction.Transactional;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	@Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N'")
 	List<Expense> findAllActive();
-	  Optional<Expense> findById(Long id);
+
+	Optional<Expense> findById(Long id);
 
 	@Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N' AND e.id = :id")
 	Optional<Expense> findActiveById(@Param("id") Long id);
@@ -46,9 +51,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
 	@Query("SELECT e FROM Expense e WHERE e.member.name ILIKE %:name% AND e.isDeleted = 'N'")
 	List<Expense> findByMemberNameContainingIgnoreCase(@Param("name") String name);
+
+	@Query("SELECT e FROM Expense e WHERE e.active = true AND (e.isDeleted IS NULL OR e.isDeleted != 'Y')")
+	List<Expense> findByActiveTrueAndIsDeletedNot(String deletedFlag);
+
 	List<Expense> findByActiveTrue();
 
-	
-	
-
+	@Modifying
+	@Query("UPDATE Expense e SET e.isDeleted = 'Y', e.deletedAt = :now, e.deletedBy.id = :userId WHERE e.isDeleted = 'N'")
+	void softDeleteAllExpenses(@Param("now") LocalDateTime now, @Param("userId") Long userId);
 }
