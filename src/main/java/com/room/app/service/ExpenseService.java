@@ -75,7 +75,10 @@ public class ExpenseService {
 		LocalDate end = start.plusYears(1).minusDays(1);
 		return expenseRepository.findByDateBetween(start, end);
 	}
+<<<<<<< HEAD
 	
+=======
+>>>>>>> cf82eacecde283be10c15e04544a821c477e0c0a
 	@Cacheable(value = "expensesByMember", key = "#memberId")
 	public List<Expense> getExpensesByMember(Long memberId) {
 		return expenseRepository.findByMemberId(memberId);
