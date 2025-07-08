@@ -60,7 +60,7 @@ public class TelegramBotService {
 			}
 
 			if (!parts[1].matches("^[\\d.,]+$")) {
-				throw new IllegalArgumentException("❌ Amount must be a number!");
+				throw new IllegalArgumentException("❌ Amount must be a number! and EX:Groceries, 2500");
 			}
 
 			String description = sanitizeInput(parts[0]);

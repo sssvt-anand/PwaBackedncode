@@ -240,7 +240,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 			case "/members" -> sendResponse(chatId, telegramBotService.listAllMembers());
 			case "/t" -> sendResponse(chatId, telegramBotService.getAllExpenses());
 			case "/summary" -> sendResponse(chatId, telegramBotService.getExpenseSummary());
-			case "full" -> sendResponse(chatId, telegramBotService.getDetailedExpenseSummary());
+			case "/full" -> sendResponse(chatId, telegramBotService.getDetailedExpenseSummary());
 			case "/help" -> sendResponse(chatId, getHelpMessage());
 			default -> sendResponse(chatId, "❌ Unknown command. Use /help");
 			}
@@ -258,7 +258,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 				  Example: /register Anand +917013209225
 
 				*Expenses*
-				/expense [Description], [Amount] - Add expense
+				[Description], [Amount] - Add expense
 				/t - Show total expenses
 				
 				/full -detailed expense summary
