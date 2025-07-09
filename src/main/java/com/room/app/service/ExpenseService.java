@@ -92,12 +92,14 @@ public class ExpenseService {
 	public Expense saveExpense(Expense expense) {
 		return expenseRepository.save(expense);
 	}
+
 	@Cacheable(value = "clearedSummaryByMember")
 	public Map<String, BigDecimal> getClearedSummaryByMember() {
 		return expenseRepository.findAllActive().stream().filter(expense -> expense.getClearedAmount() != null)
 				.collect(Collectors.groupingBy(expense -> expense.getMember().getName(),
 						Collectors.reducing(BigDecimal.ZERO, Expense::getClearedAmount, BigDecimal::add)));
 	}
+
 	@Cacheable(value = "expenseSummaryByMember")
 	public Map<String, BigDecimal> getExpenseSummaryByMember() {
 		return expenseRepository.findAllActive().stream().filter(expense -> expense.getMember() != null)
@@ -118,16 +120,23 @@ public class ExpenseService {
 	public Expense addExpense(ExpenseRequest expenseRequest) throws ResourceNotFoundException {
 		Member member = memberService.getMemberById(expenseRequest.getMemberId());
 
-		budgetService.deductFromBudget(expenseRequest.getAmount());
-
 		Expense expense = new Expense();
 		expense.setMember(member);
 		expense.setDescription(expenseRequest.getDescription());
 		expense.setDate(expenseRequest.getDate());
 		expense.setAmount(expenseRequest.getAmount());
 		expense.setRemainingAmount(expenseRequest.getAmount());
+		budgetService.deductFromBudget(expenseRequest.getAmount());
 
 		return expenseRepository.save(expense);
+	}
+
+	public BigDecimal getTotalExpensesForCurrentMonth() {
+		LocalDate start = LocalDate.now().withDayOfMonth(1);
+		LocalDate end = start.plusMonths(1).minusDays(1);
+
+		return expenseRepository.findByDateBetween(start, end).stream().map(Expense::getAmount).reduce(BigDecimal.ZERO,
+				BigDecimal::add);
 	}
 
 	@Transactional
@@ -258,6 +267,7 @@ public class ExpenseService {
 
 		return expenseRepository.save(expense);
 	}
+
 	@Cacheable(value = "expensesByMemberName", key = "#memberName")
 	public List<Expense> getExpensesByMemberName(String memberName) {
 		return expenseRepository.findByMemberNameContainingIgnoreCase(memberName);
@@ -313,4 +323,5 @@ public class ExpenseService {
 	public void clearAllExpenses(User user) {
 		expenseRepository.softDeleteAllExpenses(LocalDateTime.now(), user.getId());
 	}
+
 }

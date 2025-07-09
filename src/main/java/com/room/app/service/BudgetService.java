@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy; // ✅ Correct import
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +23,17 @@ import com.room.app.repository.BudgetRepository;
 import com.room.app.repository.MemberRepository;
 
 @Service
-
 public class BudgetService {
+
 	@Autowired
 	private BudgetRepository budgetRepository;
+
 	@Autowired
 	private MemberRepository memberRepository;
+
+	@Autowired
+	@Lazy
+	private ExpenseService expenseService;
 
 	@Scheduled(cron = "0 0 0 1 * ?") // Runs on 1st of each month at midnight
 	@Transactional
@@ -59,7 +65,25 @@ public class BudgetService {
 		// Else: Active budget already exists → do nothing
 	}
 
-	// Helper method to create a new budget
+	// In BudgetService.java
+	@Transactional
+	public void recalculateBudget() {
+		Budget currentBudget = getCurrentBudget();
+
+		// Recalculate total budget from members
+		BigDecimal newTotal = memberRepository.findAll().stream().filter(m -> m.getMonthlyBudget() != null)
+				.map(Member::getMonthlyBudget).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		// Get total expenses
+		BigDecimal totalExpenses = expenseService.getTotalExpensesForCurrentMonth();
+
+		// Update budget
+		currentBudget.setTotalBudget(newTotal);
+		currentBudget.setRemainingBudget(newTotal.subtract(totalExpenses));
+		budgetRepository.save(currentBudget);
+	}
+
+	// In BudgetService.java
 	private void createNewBudget(String monthYear) {
 		List<Member> members = memberRepository.findAll();
 		BigDecimal totalBudget = members.stream().filter(m -> m.getMonthlyBudget() != null)
@@ -68,8 +92,8 @@ public class BudgetService {
 		Budget newBudget = new Budget();
 		newBudget.setMonthYear(monthYear);
 		newBudget.setTotalBudget(totalBudget);
-		newBudget.setRemainingBudget(BigDecimal.ZERO);
-		newBudget.setDeleted("N"); // Ensure it's active
+		newBudget.setRemainingBudget(BigDecimal.ZERO); // Initialize remaining = total
+		newBudget.setDeleted("N");
 		budgetRepository.save(newBudget);
 	}
 
@@ -129,6 +153,7 @@ public class BudgetService {
 		budgetRepository.save(currentBudget);
 	}
 
+	// In BudgetService.java
 	@Transactional
 	public Member updateMemberBudget(Long memberId, BigDecimal monthlyBudget) throws ResourceNotFoundException {
 		// Validate input
@@ -139,31 +164,47 @@ public class BudgetService {
 			throw new IllegalArgumentException("Monthly budget cannot be negative");
 		}
 
-		// Get the member
 		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + memberId));
+				.orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-		// Get the current budget
-		Budget currentBudget = budgetRepository.findTopByOrderByCreatedAtDesc()
-				.orElseThrow(() -> new ResourceNotFoundException("No budget available"));
+		Budget currentBudget = getCurrentBudget();
+		BigDecimal oldBudget = member.getMonthlyBudget() != null ? member.getMonthlyBudget() : BigDecimal.ZERO;
+		BigDecimal difference = monthlyBudget.subtract(oldBudget);
 
-		// Calculate the difference this change will make
-		BigDecimal oldMemberBudget = member.getMonthlyBudget() != null ? member.getMonthlyBudget() : BigDecimal.ZERO;
-		BigDecimal budgetDifference = monthlyBudget.subtract(oldMemberBudget);
-
-		// Update the member's budget
+		// Update member
 		member.setMonthlyBudget(monthlyBudget);
-		Member updatedMember = memberRepository.save(member);
+		memberRepository.save(member);
 
-		// Update the total budget if we're in the current month
-		String currentMonthYear = YearMonth.now().toString();
-		if (currentBudget.getMonthYear().equals(currentMonthYear)) {
-			currentBudget.setTotalBudget(currentBudget.getTotalBudget().add(budgetDifference));
-			currentBudget.setRemainingBudget(currentBudget.getRemainingBudget().add(budgetDifference));
+		// Update budget if current month
+		if (currentBudget.getMonthYear().equals(YearMonth.now().toString())) {
+			BigDecimal newTotalBudget = currentBudget.getTotalBudget().add(difference);
+			currentBudget.setTotalBudget(newTotalBudget);
+
+			// Only adjust remaining budget if no expenses exist yet
+			if (expenseService.getTotalExpensesForCurrentMonth().compareTo(BigDecimal.ZERO) == 0) {
+				currentBudget.setRemainingBudget(BigDecimal.ZERO);
+			}
+
 			budgetRepository.save(currentBudget);
 		}
 
-		return updatedMember;
+		return member;
+	}
+
+	@Transactional
+	public void addExpense(BigDecimal amount) {
+		Budget currentBudget = getCurrentBudget();
+		currentBudget.setRemainingBudget(currentBudget.getRemainingBudget().subtract(amount));
+		budgetRepository.save(currentBudget);
+	}
+
+	@Transactional
+	public void recalculateRemainingBudget() {
+		Budget currentBudget = getCurrentBudget();
+		// Assuming you have an expense service to get total expenses
+		BigDecimal totalExpenses = expenseService.getTotalExpensesForCurrentMonth();
+		currentBudget.setRemainingBudget(currentBudget.getTotalBudget().subtract(totalExpenses));
+		budgetRepository.save(currentBudget);
 	}
 
 	@Transactional(readOnly = true)
