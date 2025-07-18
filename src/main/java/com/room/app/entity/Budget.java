@@ -41,7 +41,7 @@ public class Budget {
 	@Column(name = "archived_at")
 	private LocalDateTime archivedAt;
 
-	@Column(name = "is_deleted", columnDefinition = "CHAR(1) DEFAULT 'N'")
+	@Column(name = "is_deleted", columnDefinition = "CHAR(1)")
 	private String deleted = "N";
 
 	@Column(name = "deleted_at")
