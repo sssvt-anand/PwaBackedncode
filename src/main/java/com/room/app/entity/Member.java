@@ -45,7 +45,7 @@ public class Member {
 	private Long chatId;
 
 	@Column(name = "is_admin", nullable = false)
-	private boolean admin = false;
+	private boolean admin = true;
 
 	public Member() {
 	}
