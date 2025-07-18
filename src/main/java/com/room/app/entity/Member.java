@@ -16,8 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 
-@Table(name = "member",
-			indexes = { @Index(name = "idx_member_name", columnList = "name"),
+@Table(name = "member", indexes = { @Index(name = "idx_member_name", columnList = "name"),
 		@Index(name = "idx_member_active", columnList = "active") })
 public class Member {
 
@@ -30,6 +29,9 @@ public class Member {
 
 	@Column(name = "monthly_budget", precision = 10, scale = 2)
 	private BigDecimal monthlyBudget;
+	
+	@Column(name = "active")
+	private boolean active;
 
 	@OneToMany(mappedBy = "member")
 	@JsonIgnore
