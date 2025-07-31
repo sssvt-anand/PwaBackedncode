@@ -9,9 +9,12 @@ import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
+import com.room.app.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,37 +31,40 @@ public class JwtUtil {
     private final SecretKey secretKey;
     private final long expirationMs;
     private final long refreshExpirationMs;
+    private final UserService userService;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret, 
+    public JwtUtil(@Value("${jwt.secret}") String secret,
                    @Value("${jwt.expiration}") long expirationMs,
-                   @Value("${jwt.refreshExpiration}") long refreshExpirationMs) {
+                   @Value("${jwt.refreshExpiration}") long refreshExpirationMs,
+                   @Lazy UserService userService) {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
         this.expirationMs = expirationMs;
         this.refreshExpirationMs = refreshExpirationMs;
+        this.userService = userService;
     }
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", userDetails.getAuthorities().stream()
-            .map(auth -> auth.getAuthority().startsWith("ROLE_") ? auth.getAuthority() : "ROLE_" + auth.getAuthority())
-            .collect(Collectors.toList()));
+                .map(auth -> auth.getAuthority().startsWith("ROLE_") ? auth.getAuthority() : "ROLE_" + auth.getAuthority())
+                .collect(Collectors.toList()));
 
         return Jwts.builder()
-            .setSubject(userDetails.getUsername())
-            .addClaims(claims)
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-            .signWith(secretKey, SignatureAlgorithm.HS256)
-            .compact();
+                .setSubject(userDetails.getUsername())
+                .addClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
         return Jwts.builder()
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
-            .signWith(secretKey, SignatureAlgorithm.HS256)
-            .compact();
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String extractUsername(String token) {
@@ -67,15 +73,15 @@ public class JwtUtil {
 
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username != null && 
-                username.equals(userDetails.getUsername()) && 
+        return (username != null &&
+                username.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token));
     }
 
     public boolean canTokenBeRefreshed(String token) {
-        return !isTokenExpired(token) || 
-               (isTokenExpired(token) && 
-                getClaims(token).getExpiration().after(new Date(System.currentTimeMillis() - refreshExpirationMs)));
+        return !isTokenExpired(token) ||
+                (isTokenExpired(token) &&
+                        getClaims(token).getExpiration().after(new Date(System.currentTimeMillis() - refreshExpirationMs)));
     }
 
     private boolean isTokenExpired(String token) {
@@ -95,8 +101,8 @@ public class JwtUtil {
         List<String> roles = claims.get("roles", List.class);
 
         return roles.stream()
-            .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
-            .collect(Collectors.toList());
+                .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+                .collect(Collectors.toList());
     }
 
     public boolean shouldRefreshToken(String token) {
@@ -104,4 +110,12 @@ public class JwtUtil {
         Date expiration = claims.getExpiration();
         return expiration.before(new Date(System.currentTimeMillis() + 300000)); // 5 minutes
     }
+
+    public boolean isRefreshTokenValid(String refreshToken, UserDetails userDetails) {
+        final String username = extractUsername(refreshToken);
+        return (username != null &&
+                username.equals(userDetails.getUsername()) &&
+                !isTokenExpired(refreshToken));
+    }
+
 }

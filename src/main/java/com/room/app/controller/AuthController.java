@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.naming.AuthenticationException;
 
+import com.room.app.dto.RefreshTokenRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +46,19 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody User user) throws AuthenticationException {
         try {
             Map<String, Object> response = authService.login(user);
-            return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + response.get("token"))
-                .body(response);
+            return ResponseEntity.ok().header("Authorization", "Bearer " + response.get("token")).body(response);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        try {
+            Map<String, Object> tokens = authService.refreshToken(request);
+            return ResponseEntity.ok(tokens);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
 
@@ -58,10 +67,7 @@ public class AuthController {
         try {
             return ResponseEntity.ok(authService.register(user));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "status", "failed",
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(Map.of("status", "failed", "message", e.getMessage()));
         }
     }
 
@@ -70,35 +76,23 @@ public class AuthController {
         try {
             return ResponseEntity.ok(authService.forgotPassword(request));
         } catch (OTPException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "status", "error",
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("status", "error", "message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "status", "error",
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
-    
+
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
             return ResponseEntity.ok(authService.resetPassword(request));
         } catch (OTPException e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "status", "error",
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.badRequest().body(Map.of("status", "error", "message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "status", "error",
-                "message", e.getMessage()
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
-    
+
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
         return ResponseEntity.ok(authService.logout());
@@ -109,16 +103,13 @@ public class AuthController {
         try {
             return ResponseEntity.ok(authService.getCurrentUserDetails());
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Unauthorized"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
         }
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update/{userId}/role")
-    public ResponseEntity<UserResponse> updateUserRole(
-            @PathVariable Long userId,
-            @RequestParam String newRole) throws ResourceNotFoundException {
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long userId, @RequestParam String newRole) throws ResourceNotFoundException {
         return ResponseEntity.ok(authService.updateUserRole(userId, newRole));
     }
 

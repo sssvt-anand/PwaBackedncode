@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +16,15 @@ import com.room.app.repository.UserRepository;
 
 @Service
 public class UserService {
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
+	// Use constructor injection instead of @Autowired
+	public UserService(UserRepository userRepository,
+					   PasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 	public void register(User user) throws Exception {
 		if (user.getName() == null || user.getName().trim().isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be empty");
@@ -75,4 +80,6 @@ public class UserService {
 	public boolean existsByEmail(String email) {
 		return userRepository.existsByEmail(email);
 	}
+
+
 }
