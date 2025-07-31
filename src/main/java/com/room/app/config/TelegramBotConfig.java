@@ -10,7 +10,6 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TelegramBotConfig {
 
     private final MyTelegramBot myTelegramBot;
-    private TelegramBotsApi botsApi;
 
     public TelegramBotConfig(MyTelegramBot myTelegramBot) {
         this.myTelegramBot = myTelegramBot;
@@ -18,16 +17,8 @@ public class TelegramBotConfig {
 
     @Bean
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
-        // Singleton pattern
-        if (botsApi == null) {
-            synchronized (this) {
-                if (botsApi == null) {
-                    botsApi = new TelegramBotsApi(DefaultBotSession.class);
-                    botsApi.registerBot(myTelegramBot);
-                }
-            }
-        }
+        TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+        botsApi.registerBot(myTelegramBot);
         return botsApi;
     }
-
 }

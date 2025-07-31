@@ -54,17 +54,7 @@ public class ExpenseController<ExpenseResponse> {
 
 	@GetMapping("/summary")
 	public ResponseEntity<Map<String, Map<String, BigDecimal>>> getMemberBalances() {
-		Map<String, BigDecimal> totalMap = expenseService.getExpenseSummaryByMember();
-		Map<String, BigDecimal> clearedMap = expenseService.getClearedSummaryByMember();
-
-		Map<String, Map<String, BigDecimal>> result = totalMap.entrySet().stream()
-				.collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-					BigDecimal total = entry.getValue();
-					BigDecimal cleared = clearedMap.getOrDefault(entry.getKey(), BigDecimal.ZERO);
-					return Map.of("total", total, "cleared", cleared, "remaining", total.subtract(cleared));
-				}));
-
-		return ResponseEntity.ok(result);
+		return ResponseEntity.ok(expenseService.getMemberBalances());
 	}
 
 	@PutMapping("/{id}")
@@ -133,9 +123,7 @@ public class ExpenseController<ExpenseResponse> {
 	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@PostMapping("/clear-all")
 	public ResponseEntity<String> clearAllData(Principal principal, User user) {
-		// Get the authenticated user by email
 		expenseService.clearAllExpenses(user);
-
 		return ResponseEntity.ok("All expenses cleared successfully");
 	}
 

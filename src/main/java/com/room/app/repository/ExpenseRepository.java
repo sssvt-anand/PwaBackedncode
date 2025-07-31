@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.room.app.dto.MemberBalanceSummary;
 import com.room.app.entity.Expense;
 import com.room.app.entity.User;
 
@@ -35,7 +36,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	@Query("SELECT e.member, SUM(e.amount) as total FROM Expense e GROUP BY e.member ORDER BY total DESC")
 	List<Object[]> getTopSpenderWithAmount();
 
-	
 	List<Expense> findByMemberId(Long memberId);
 
 	List<Expense> findByMemberIsNull();
@@ -61,4 +61,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	@Modifying
 	@Query("UPDATE Expense e SET e.isDeleted = 'Y', e.deletedAt = :now, e.deletedBy.id = :userId WHERE e.isDeleted = 'N'")
 	void softDeleteAllExpenses(@Param("now") LocalDateTime now, @Param("userId") Long userId);
+
+	@Query("SELECT e.member.name, SUM(e.clearedAmount) FROM Expense e WHERE e.clearedAmount IS NOT NULL "
+			+ "GROUP BY e.member.name")
+	List<Object[]> getClearedSummaryByMember();
+
+	@Query("SELECT e.member.name, SUM(e.amount) FROM Expense e WHERE e.member IS NOT NULL GROUP BY e.member.name")
+	List<Object[]> getExpenseSummaryByMember();
+
+	@Query("SELECT e.member.name as memberName, SUM(e.amount) as totalAmount,"
+			+ "COALESCE(SUM(e.clearedAmount), 0) as clearedAmount FROM Expense e WHERE e.member IS NOT NULL "
+			+ "GROUP BY e.member.name")
+	List<MemberBalanceSummary> getMemberBalanceSummary();
+
 }

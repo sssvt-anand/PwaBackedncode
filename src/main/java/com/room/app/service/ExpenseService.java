@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.room.app.dto.ExpenseRequest;
+import com.room.app.dto.MemberBalanceSummary;
 import com.room.app.entity.Expense;
 import com.room.app.entity.Member;
 import com.room.app.entity.PaymentHistory;
@@ -95,16 +96,15 @@ public class ExpenseService {
 
 	@Cacheable(value = "clearedSummaryByMember")
 	public Map<String, BigDecimal> getClearedSummaryByMember() {
-		return expenseRepository.findAllActive().stream().filter(expense -> expense.getClearedAmount() != null)
-				.collect(Collectors.groupingBy(expense -> expense.getMember().getName(),
-						Collectors.reducing(BigDecimal.ZERO, Expense::getClearedAmount, BigDecimal::add)));
+		return expenseRepository.getClearedSummaryByMember().stream()
+				.collect(Collectors.toMap(arr -> (String) arr[0], arr -> (BigDecimal) arr[1] // sum of cleared amounts
+				));
 	}
 
 	@Cacheable(value = "expenseSummaryByMember")
 	public Map<String, BigDecimal> getExpenseSummaryByMember() {
-		return expenseRepository.findAllActive().stream().filter(expense -> expense.getMember() != null)
-				.collect(Collectors.groupingBy(expense -> expense.getMember().getName(),
-						Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)));
+		return expenseRepository.getExpenseSummaryByMember().stream()
+				.collect(Collectors.toMap(arr -> (String) arr[0], arr -> (BigDecimal) arr[1]));
 	}
 
 	public void markExpenseCleared(Long expenseId, BigDecimal amount) throws ResourceNotFoundException {
@@ -197,24 +197,6 @@ public class ExpenseService {
 		expense.setDeletedAt(LocalDateTime.now());
 		expenseRepository.save(expense);
 	}
-	/*
-	 * public void deleteExpense(Long id, User user) throws
-	 * ResourceNotFoundException, AccessDeniedException, IllegalStateException { if
-	 * (!isAdmin(user)) { throw new
-	 * AccessDeniedException("Only admins can delete expenses"); } Expense expense =
-	 * expenseRepository.findById(id) .orElseThrow(() -> new
-	 * ResourceNotFoundException("Expense not found"));
-	 * 
-	 * if (expense.isCleared()) { throw new
-	 * IllegalStateException("Cannot delete expense that has been cleared (fully cleared)"
-	 * ); }
-	 * 
-	 * if (!user.getRole().equalsIgnoreCase("ROLE_ADMIN") &&
-	 * !user.getRole().equalsIgnoreCase("ADMIN")) { throw new
-	 * AccessDeniedException("Only admins can delete expenses"); }
-	 * 
-	 * expenseRepository.deleteById(id); }
-	 */
 
 	private boolean isAdmin(User user) {
 		return user.getRole().equalsIgnoreCase("ROLE_ADMIN") || user.getRole().equalsIgnoreCase("ADMIN");
@@ -284,40 +266,12 @@ public class ExpenseService {
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
 	}
 
-	/*
-	 * @Transactional public void clearAllExpenses() { // Verify we have a current
-	 * budget Budget currentBudget = budgetService.getCurrentBudget(); BigDecimal
-	 * totalClearedAmount = BigDecimal.ZERO;
-	 * 
-	 * // Get all active, non-deleted expenses List<Expense> expenses =
-	 * expenseRepository.findByActiveTrueAndIsDeletedNot("Y");
-	 * 
-	 * for (Expense expense : expenses) { // Calculate and process remaining amount
-	 * BigDecimal remainingAmount = expense.getAmount()
-	 * .subtract(expense.getClearedAmount() != null ? expense.getClearedAmount() :
-	 * BigDecimal.ZERO);
-	 * 
-	 * if (remainingAmount.compareTo(BigDecimal.ZERO) > 0) { PaymentHistory payment
-	 * = new PaymentHistory(); payment.setAmount(remainingAmount);
-	 * payment.setTimestamp(LocalDateTime.now()); payment.setExpense(expense);
-	 * paymentHistoryRepository.save(payment);
-	 * 
-	 * totalClearedAmount = totalClearedAmount.add(remainingAmount); }
-	 * 
-	 * // Update expense status expense.setCleared(true);
-	 * expense.setClearedAt(LocalDateTime.now());
-	 * expense.setClearedAmount(expense.getAmount());
-	 * expense.setRemainingAmount(BigDecimal.ZERO); expense.setIsDeleted("Y");
-	 * expense.setDeletedAt(LocalDateTime.now());
-	 * 
-	 * // Explicitly save each expense expenseRepository.saveAndFlush(expense); //
-	 * Changed to saveAndFlush }
-	 * 
-	 * // Update budget if needed if (totalClearedAmount.compareTo(BigDecimal.ZERO)
-	 * > 0) {
-	 * currentBudget.setRemainingBudget(currentBudget.getRemainingBudget().add(
-	 * totalClearedAmount)); budgetRepository.save(currentBudget); } }
-	 */
+	public Map<String, Map<String, BigDecimal>> getMemberBalances() {
+		return expenseRepository.getMemberBalanceSummary().stream()
+				.collect(Collectors.toMap(MemberBalanceSummary::getMemberName,
+						summary -> Map.of("total", summary.getTotalAmount(), "cleared", summary.getClearedAmount(),
+								"remaining", summary.getRemainingAmount())));
+	}
 
 	@Transactional
 	public void clearAllExpenses(User user) {
