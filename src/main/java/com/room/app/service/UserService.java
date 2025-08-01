@@ -1,11 +1,9 @@
 package com.room.app.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.room.app.exception.UserEmailNotFound;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +64,7 @@ public class UserService {
 
 	public User findByEmail(String email) {
 		return userRepository.findByEmail(email)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+				.orElseThrow(() -> new UserEmailNotFound("User not found with email: " + email));
 	}
 
 	public void updatePassword(String email, String newPassword) {

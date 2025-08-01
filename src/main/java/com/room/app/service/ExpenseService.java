@@ -94,14 +94,14 @@ public class ExpenseService {
 		return expenseRepository.save(expense);
 	}
 
-	@Cacheable(value = "clearedSummaryByMember")
+
 	public Map<String, BigDecimal> getClearedSummaryByMember() {
 		return expenseRepository.getClearedSummaryByMember().stream()
 				.collect(Collectors.toMap(arr -> (String) arr[0], arr -> (BigDecimal) arr[1] // sum of cleared amounts
 				));
 	}
 
-	@Cacheable(value = "expenseSummaryByMember")
+
 	public Map<String, BigDecimal> getExpenseSummaryByMember() {
 		return expenseRepository.getExpenseSummaryByMember().stream()
 				.collect(Collectors.toMap(arr -> (String) arr[0], arr -> (BigDecimal) arr[1]));
@@ -250,17 +250,17 @@ public class ExpenseService {
 		return expenseRepository.save(expense);
 	}
 
-	@Cacheable(value = "expensesByMemberName", key = "#memberName")
+
 	public List<Expense> getExpensesByMemberName(String memberName) {
 		return expenseRepository.findByMemberNameContainingIgnoreCase(memberName);
 	}
 
-	@Cacheable(value = "paymentHistory", key = "#expenseId")
+
 	public List<PaymentHistory> getPaymentHistoryByExpense(Long expenseId) {
 		return paymentHistoryRepository.findByExpenseId(expenseId);
 	}
 
-	@Cacheable(value = "expenses", key = "#id")
+
 	public Expense getExpenseById(Long id) throws ResourceNotFoundException {
 		return expenseRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
