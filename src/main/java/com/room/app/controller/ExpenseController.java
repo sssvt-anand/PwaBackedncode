@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.room.app.dto.ExpenseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +44,8 @@ public class ExpenseController<ExpenseResponse> {
 	private UserRepository userRepository;
 
 	@GetMapping
-	public List<Expense> getAllExpenses() {
-		return expenseService.getAllActiveExpenses();
+	public List<ExpenseDTO> getAllExpenses() {
+		return expenseService.getAllActiveExpensesUi();
 	}
 
 	@PostMapping

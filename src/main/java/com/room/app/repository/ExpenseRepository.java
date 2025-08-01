@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.room.app.dto.ExpenseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,58 +21,78 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-	@Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N'")
-	List<Expense> findAllActive();
+    @Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N'")
+    List<Expense> findAllActive();
 
-	Optional<Expense> findById(Long id);
+    @Query("""
+                SELECT new com.room.app.dto.ExpenseDTO(
+                    e.id,
+                    e.description,
+                    e.date,
+                    e.amount,
+                    e.clearedAmount,
+                    e.remainingAmount,
+                    CASE WHEN e.clearedAmount >= e.amount THEN true ELSE false END,
+                    m.name,
+                    m.id,
+                    e.lastClearedAt,
+                    e.lastClearedAmount,
+                    lcb.name
+                )
+                FROM Expense e
+                LEFT JOIN e.member m
+                LEFT JOIN e.lastClearedBy lcb
+                WHERE e.isDeleted = 'N'
+            """)
+    List<ExpenseDTO> findAllActiveUi();
 
-	@Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N' AND e.id = :id")
-	Optional<Expense> findActiveById(@Param("id") Long id);
 
-	List<Expense> findByIsDeleted(String isDeleted);
+    Optional<Expense> findById(Long id);
 
-	@Query("SELECT e.member, SUM(e.amount) FROM Expense e GROUP BY e.member")
-	List<Object[]> getTotalExpensesByMember();
+    @Query("SELECT e FROM Expense e WHERE e.isDeleted = 'N' AND e.id = :id")
+    Optional<Expense> findActiveById(@Param("id") Long id);
 
-	@Query("SELECT e.member, SUM(e.amount) as total FROM Expense e GROUP BY e.member ORDER BY total DESC")
-	List<Object[]> getTopSpenderWithAmount();
+    List<Expense> findByIsDeleted(String isDeleted);
 
-	List<Expense> findByMemberId(Long memberId);
+    @Query("SELECT e.member, SUM(e.amount) FROM Expense e GROUP BY e.member")
+    List<Object[]> getTotalExpensesByMember();
 
-	List<Expense> findByMemberIsNull();
+    @Query("SELECT e.member, SUM(e.amount) as total FROM Expense e GROUP BY e.member ORDER BY total DESC")
+    List<Object[]> getTopSpenderWithAmount();
 
-	Optional<Expense> findByMessageId(Integer messageId);
+    List<Expense> findByMemberId(Long memberId);
 
-	@Query("SELECT SUM(e.amount) FROM Expense e WHERE e.member.name = :member AND e.cleared = true")
-	Optional<BigDecimal> findClearedAmountByMember(@Param("member") String member);
+    List<Expense> findByMemberIsNull();
 
-	List<Expense> findByClearedTrue();
+    Optional<Expense> findByMessageId(Integer messageId);
 
-	@Query("SELECT e FROM Expense e WHERE e.date BETWEEN :startDate AND :endDate")
-	List<Expense> findByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    @Query("SELECT SUM(e.amount) FROM Expense e WHERE e.member.name = :member AND e.cleared = true")
+    Optional<BigDecimal> findClearedAmountByMember(@Param("member") String member);
 
-	@Query("SELECT e FROM Expense e WHERE e.member.name ILIKE %:name% AND e.isDeleted = 'N'")
-	List<Expense> findByMemberNameContainingIgnoreCase(@Param("name") String name);
+    List<Expense> findByClearedTrue();
 
-	@Query("SELECT e FROM Expense e WHERE e.active = true AND (e.isDeleted IS NULL OR e.isDeleted != 'Y')")
-	List<Expense> findByActiveTrueAndIsDeletedNot(String deletedFlag);
+    @Query("SELECT e FROM Expense e WHERE e.date BETWEEN :startDate AND :endDate")
+    List<Expense> findByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-	List<Expense> findByActiveTrue();
+    @Query("SELECT e FROM Expense e WHERE e.member.name ILIKE %:name% AND e.isDeleted = 'N'")
+    List<Expense> findByMemberNameContainingIgnoreCase(@Param("name") String name);
 
-	@Modifying
-	@Query("UPDATE Expense e SET e.isDeleted = 'Y', e.deletedAt = :now, e.deletedBy.id = :userId WHERE e.isDeleted = 'N'")
-	void softDeleteAllExpenses(@Param("now") LocalDateTime now, @Param("userId") Long userId);
+    @Query("SELECT e FROM Expense e WHERE e.active = true AND (e.isDeleted IS NULL OR e.isDeleted != 'Y')")
+    List<Expense> findByActiveTrueAndIsDeletedNot(String deletedFlag);
 
-	@Query("SELECT e.member.name, SUM(e.clearedAmount) FROM Expense e WHERE e.clearedAmount IS NOT NULL "
-			+ "GROUP BY e.member.name")
-	List<Object[]> getClearedSummaryByMember();
+    List<Expense> findByActiveTrue();
 
-	@Query("SELECT e.member.name, SUM(e.amount) FROM Expense e WHERE e.member IS NOT NULL GROUP BY e.member.name")
-	List<Object[]> getExpenseSummaryByMember();
+    @Modifying
+    @Query("UPDATE Expense e SET e.isDeleted = 'Y', e.deletedAt = :now, e.deletedBy.id = :userId WHERE e.isDeleted = 'N'")
+    void softDeleteAllExpenses(@Param("now") LocalDateTime now, @Param("userId") Long userId);
 
-	@Query("SELECT e.member.name as memberName, SUM(e.amount) as totalAmount,"
-			+ "COALESCE(SUM(e.clearedAmount), 0) as clearedAmount FROM Expense e WHERE e.member IS NOT NULL "
-			+ "GROUP BY e.member.name")
-	List<MemberBalanceSummary> getMemberBalanceSummary();
+    @Query("SELECT e.member.name, SUM(e.clearedAmount) FROM Expense e WHERE e.clearedAmount IS NOT NULL " + "GROUP BY e.member.name")
+    List<Object[]> getClearedSummaryByMember();
+
+    @Query("SELECT e.member.name, SUM(e.amount) FROM Expense e WHERE e.member IS NOT NULL GROUP BY e.member.name")
+    List<Object[]> getExpenseSummaryByMember();
+
+    @Query("SELECT e.member.name as memberName, SUM(e.amount) as totalAmount," + "COALESCE(SUM(e.clearedAmount), 0) as clearedAmount FROM Expense e WHERE e.member IS NOT NULL " + "GROUP BY e.member.name")
+    List<MemberBalanceSummary> getMemberBalanceSummary();
 
 }
