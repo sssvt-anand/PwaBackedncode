@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.naming.AuthenticationException;
 
 import com.room.app.dto.RefreshTokenRequest;
+import com.room.app.exception.UserEmailNotFound;
+import org.apache.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,12 +45,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) throws AuthenticationException {
+    public ResponseEntity<?> login(@RequestBody User user) {
         try {
             Map<String, Object> response = authService.login(user);
-            return ResponseEntity.ok().header("Authorization", "Bearer " + response.get("token")).body(response);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + response.get("token"))
+                    .body(response);
+        } catch (UserEmailNotFound e) {
+            // Consistent with bad credentials message for security
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
         }
     }
 
